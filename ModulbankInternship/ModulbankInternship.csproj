@@ -7,7 +7,14 @@
     </PropertyGroup>
 
     <ItemGroup>
+      <PackageReference Include="FluentValidation.AspNetCore" Version="11.3.1" />
+      <PackageReference Include="MediatR" Version="13.0.0" />
+      <PackageReference Include="Net4x.FluentValidation.DependencyInjectionExtensions" Version="11.5.2" />
       <PackageReference Include="Swashbuckle" Version="5.6.0" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="Users\Validators\" />
     </ItemGroup>
 
 </Project>

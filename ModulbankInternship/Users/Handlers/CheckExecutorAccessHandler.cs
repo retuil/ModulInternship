@@ -36,6 +36,6 @@ public class CheckExecutorAccessHandler(IUserRepository userRepository)
             }
         }
 
-        throw new ForbiddenException();
+        throw new ForbiddenException($"No access rights for user id: {request.ExecutorId} when make action with a resource owned by id: {request.OwnerId}. User role: {executor.Role}. Required role: {string.Join(@"\", request.AccessClasses.Select(x => x.ToString()))}");
     }
 }

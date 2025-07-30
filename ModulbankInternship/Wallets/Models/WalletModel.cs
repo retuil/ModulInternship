@@ -2,6 +2,7 @@ using System.Transactions;
 using ModulbankInternship.Infrastructure;
 using ModulbankInternship.Transactions;
 using ModulbankInternship.Transactions;
+using ModulbankInternship.Transactions.Models;
 
 namespace ModulbankInternship.Account;
 
@@ -13,7 +14,7 @@ public class WalletModel: IModel
     public string Currency { get; set; }
     public decimal Balance { get; set; }
     public decimal? InterestRate { get; set; }
-    public bool IsExist { get; set; }
+    public bool IsExist { get; set; } = true;
     public DateTime OpeningDate { get; set; }
     public DateTime? ClosingDate { get; set; }
     public List<TransactionModel> Transactions { get; set; } = new List<TransactionModel>();

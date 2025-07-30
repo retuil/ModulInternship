@@ -4,17 +4,17 @@
         <TargetFramework>net9.0</TargetFramework>
         <Nullable>enable</Nullable>
         <ImplicitUsings>enable</ImplicitUsings>
+        <GenerateDocumentationFile>true</GenerateDocumentationFile>
+        <NoWarn>$(NoWarn);1591</NoWarn>
     </PropertyGroup>
 
     <ItemGroup>
       <PackageReference Include="FluentValidation.AspNetCore" Version="11.3.1" />
       <PackageReference Include="MediatR" Version="13.0.0" />
       <PackageReference Include="Net4x.FluentValidation.DependencyInjectionExtensions" Version="11.5.2" />
+      <PackageReference Include="Swagger-Net" Version="8.5.12.1" />
       <PackageReference Include="Swashbuckle" Version="5.6.0" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <Folder Include="Users\Validators\" />
+      <PackageReference Include="Swashbuckle.AspNetCore" Version="9.0.3" />
     </ItemGroup>
 
 </Project>

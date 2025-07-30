@@ -4,6 +4,7 @@ using ModulbankInternship.Auth.Enums;
 using ModulbankInternship.Infrastructure;
 using ModulbankInternship.Transactions;
 using ModulbankInternship.Transactions.Enums;
+using ModulbankInternship.Transactions.Models;
 using ModulbankInternship.Transactions.Requests;
 using ModulbankInternship.Users.Requests;
 using ModulbankInternship.Wallets.Interfaces;

@@ -9,11 +9,18 @@ using ModulbankInternship.Users.Requests;
 namespace ModulbankInternship.Users;
 
 [ApiController]
-[Route("user")]
+[Microsoft.AspNetCore.Mvc.Route("user")]
 public class UserController(IMediator mediator) : ControllerBase
 {
+    /// <summary>
+    /// Получить список кошельков пользователя
+    /// </summary>
+    /// <param name="id">Идентификатор пользователя</param>
+    /// <returns>Список кошельков пользователя</returns>
+    /// <response code="200">Успешно. Возвращает список кошельков</response>
+    /// <response code="404">Пользователь не найден</response>
     [Microsoft.AspNetCore.Mvc.HttpGet]
-    [Route("{id:guid}/wallets")]
+    [Microsoft.AspNetCore.Mvc.Route("{id:guid}/wallets")]
     public async Task<WalletModel[]> GetUserWallets([FromUri] Guid id)
     {
         if (!Request.Cookies.TryGetValue(CookieConstants.UserId, out var executorId))

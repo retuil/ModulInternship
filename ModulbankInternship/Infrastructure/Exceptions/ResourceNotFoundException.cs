@@ -1,6 +1,3 @@
 namespace ModulbankInternship.Account.Exceptions;
 
-public class ResourceNotFoundException: Exception
-{
-    
-}
+public class ResourceNotFoundException(string message): Exception(message);

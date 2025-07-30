@@ -1,7 +1,7 @@
 using ModulbankInternship.Infrastructure;
 using ModulbankInternship.Transactions.Enums;
 
-namespace ModulbankInternship.Transactions;
+namespace ModulbankInternship.Transactions.Models;
 
 public class TransactionModel: IModel
 {

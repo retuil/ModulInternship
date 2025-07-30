@@ -1,6 +1,3 @@
 namespace ModulbankInternship.Users.Exceptions;
 
-public class ForbiddenException: Exception
-{
-    
-}
+public class ForbiddenException(string message) : Exception(message);

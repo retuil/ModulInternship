@@ -12,6 +12,13 @@ namespace ModulbankInternship.Auth;
 public class AuthController(IMediator _mediator)
     : ControllerBase
 {
+    /// <summary>
+    /// Вход в сервис
+    /// </summary>
+    /// <param name="contract">Данные для входа по номеру телефона и паролю</param>
+    /// <returns>Returns 200 Успешный вход.</returns>
+    /// <response code="200">Успешно. Вход в аккаунт</response>
+    /// <response code="404">Пользователь не найден</response>
     [HttpPost]
     [Route("")]
     public async Task<IActionResult> Login(AuthContract contract)
@@ -21,6 +28,10 @@ public class AuthController(IMediator _mediator)
         return Ok($"Выполнен вход в аккаунт ID: {user.Id}");
     }
     
+    /// <summary>
+    /// Выйти из аккаунта
+    /// </summary>
+    /// <returns>Returns 200 Успешный выход.</returns>
     [HttpDelete]
     [Route("")]
     public IActionResult Logout()
@@ -33,6 +44,11 @@ public class AuthController(IMediator _mediator)
         return Ok($"Выполнен выход из аккаунта id: {userId}");
     }
 
+    /// <summary>
+    /// Регистрация в сервисе
+    /// </summary>
+    /// <param name="contract">Данные для регистрации</param>
+    /// <returns>Returns 200 Успешная регистрация.</returns>
     [HttpPost]
     [Route("register")]
     public async Task<IActionResult> Register(RegisterContract contract)

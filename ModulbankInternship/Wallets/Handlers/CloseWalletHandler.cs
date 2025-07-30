@@ -21,7 +21,7 @@ public class CloseWalletHandler(IMediator _mediator, IWalletsRepository _wallets
                     new[] { EAccessClass.Owner, EAccessClass.Manager }));
         if (!wallet.IsExist)
         {
-            throw new ResourceNotFoundException();
+            throw new ResourceNotFoundException($"No open wallet with id: {request.WalletId}");
         }
 
         _walletsRepository.Delete(request.WalletId);

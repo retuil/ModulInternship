@@ -1,6 +1,7 @@
 using ModulbankInternship.Account;
 using ModulbankInternship.Transactions;
 using ModulbankInternship.Transactions.Enums;
+using ModulbankInternship.Transactions.Models;
 using ModulbankInternship.Wallets.Interfaces;
 
 namespace ModulbankInternship.Wallets;

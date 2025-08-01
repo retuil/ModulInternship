@@ -8,9 +8,9 @@ using ModulbankInternship.Transactions.Validators;
 using ModulbankInternship.Users;
 using ModulbankInternship.Users.Interfaces;
 using ModulbankInternship.Users.Validators;
-using ModulbankInternship.Wallets;
-using ModulbankInternship.Wallets.Interfaces;
-using ModulbankInternship.Wallets.Validators;
+using ModulbankInternship.Accounts;
+using ModulbankInternship.Accounts.Interfaces;
+using ModulbankInternship.Accounts.Validators;
 
 namespace ModulbankInternship;
 
@@ -45,15 +45,15 @@ public static class Registration
         });
         builder.Services.AddMediatR(cfg =>
         {
-            cfg.RegisterServicesFromAssemblyContaining<AddTransactionToWalletValidator>();
+            cfg.RegisterServicesFromAssemblyContaining<AddTransactionToAccountValidator>();
         });
         builder.Services.AddMediatR(cfg =>
         {
-            cfg.RegisterServicesFromAssemblyContaining<CloseWalletValidator>();
+            cfg.RegisterServicesFromAssemblyContaining<CloseAccountValidator>();
         });
         builder.Services.AddMediatR(cfg =>
         {
-            cfg.RegisterServicesFromAssemblyContaining<CreateWalletValidator>();
+            cfg.RegisterServicesFromAssemblyContaining<CreateAccountValidator>();
         });
         builder.Services.AddMediatR(cfg =>
         {
@@ -61,11 +61,14 @@ public static class Registration
         });
         builder.Services.AddMediatR(cfg =>
         {
-            cfg.RegisterServicesFromAssemblyContaining<ModifyWalletParametersValidator>();
+            cfg.RegisterServicesFromAssemblyContaining<ModifyAccountParametersValidator>();
         });
     }
     public static void RegisterValidators(WebApplicationBuilder? builder)
     {
+        ValidatorOptions.Global.DefaultClassLevelCascadeMode = CascadeMode.Continue;
+        ValidatorOptions.Global.DefaultRuleLevelCascadeMode = CascadeMode.Stop;
+     
         
         builder.Services.AddValidatorsFromAssemblyContaining<LoginValidator>();
         
@@ -82,19 +85,19 @@ public static class Registration
         builder.Services.AddValidatorsFromAssemblyContaining<CheckExecutorAccessValidator>();
         
         
-        builder.Services.AddValidatorsFromAssemblyContaining<AddTransactionToWalletValidator>();
+        builder.Services.AddValidatorsFromAssemblyContaining<AddTransactionToAccountValidator>();
         
         
-        builder.Services.AddValidatorsFromAssemblyContaining<CloseWalletValidator>();
+        builder.Services.AddValidatorsFromAssemblyContaining<CloseAccountValidator>();
         
         
-        builder.Services.AddValidatorsFromAssemblyContaining<CreateWalletValidator>();
+        builder.Services.AddValidatorsFromAssemblyContaining<CreateAccountValidator>();
         
         
         builder.Services.AddValidatorsFromAssemblyContaining<MakeTransferValidator>();
         
        
-        builder.Services.AddValidatorsFromAssemblyContaining<ModifyWalletParametersValidator>();
+        builder.Services.AddValidatorsFromAssemblyContaining<ModifyAccountParametersValidator>();
         
         
         builder.Services.AddFluentValidationAutoValidation();
@@ -106,18 +109,31 @@ public static class Registration
     {
         builder.Services.AddSingleton<ITransactionsRepository, TransactionsRepository>();
         builder.Services.AddSingleton<IUserRepository, UserRepository>();
-        builder.Services.AddSingleton<IWalletsRepository, WalletsRepository>();
+        builder.Services.AddSingleton<IAccountsRepository, AccountsRepository>();
     }
 
-    public static void RegisterSwagger(WebApplicationBuilder? builder)
+    public static void RegisterSwagger(WebApplicationBuilder builder)
     {
         builder.Services.AddEndpointsApiExplorer();
+
         builder.Services.AddSwaggerGen(c =>
         {
             var xmlFilename = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
-            c.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, xmlFilename));
+            var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFilename);
+            c.IncludeXmlComments(xmlPath);
         });
-        builder.Services.AddEndpointsApiExplorer();
-        builder.Services.AddSwaggerGen();
+
+        builder.Services.Configure<Microsoft.AspNetCore.Http.Json.JsonOptions>(options =>
+        {
+            options.SerializerOptions.Converters.Add(new System.Text.Json.Serialization.JsonStringEnumConverter());
+        });
+
+        builder.Services.AddControllers()
+            .AddJsonOptions(options =>
+            {
+                options.JsonSerializerOptions.Converters.Add(new System.Text.Json.Serialization.JsonStringEnumConverter());
+            });
     }
+
+
 }

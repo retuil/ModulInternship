@@ -20,14 +20,14 @@ public class UserController(IMediator mediator) : ControllerBase
     /// <response code="200">Успешно. Возвращает список кошельков</response>
     /// <response code="404">Пользователь не найден</response>
     [Microsoft.AspNetCore.Mvc.HttpGet]
-    [Microsoft.AspNetCore.Mvc.Route("{id:guid}/wallets")]
-    public async Task<WalletModel[]> GetUserWallets([FromUri] Guid id)
+    [Microsoft.AspNetCore.Mvc.Route("{id:guid}/Accounts")]
+    public async Task<AccountModel[]> GetUserAccounts([FromUri] Guid id)
     {
         if (!Request.Cookies.TryGetValue(CookieConstants.UserId, out var executorId))
         {
             throw new UnauthorizedException();
         }
-        var wallets = await mediator.Send(new GetUserWalletsQuery(id, Guid.Parse(executorId)));
-        return wallets;
+        var Accounts = await mediator.Send(new GetUserAccountsQuery(id, Guid.Parse(executorId)));
+        return Accounts;
     }
 }

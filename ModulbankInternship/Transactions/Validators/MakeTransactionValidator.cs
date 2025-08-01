@@ -11,6 +11,6 @@ public class MakeTransactionValidator: AbstractValidator<MakeTransactionCommand>
         RuleFor(c => c.NewTransactionRequest.Amount).GreaterThan(0);
         RuleFor(c => c.NewTransactionRequest.Description).NotEmpty();
         RuleFor(c => c.NewTransactionRequest.Currency).NotEmpty();
-        RuleFor(c => c.NewTransactionRequest.walletId).NotEmpty();
+        RuleFor(c => c.NewTransactionRequest.AccountId).NotEmpty();
     }
 }

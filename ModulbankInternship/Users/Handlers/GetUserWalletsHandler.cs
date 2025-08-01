@@ -3,20 +3,20 @@ using ModulbankInternship.Account;
 using ModulbankInternship.Auth.Enums;
 using ModulbankInternship.Users;
 using ModulbankInternship.Users.Requests;
-using ModulbankInternship.Wallets;
-using ModulbankInternship.Wallets.Interfaces;
+using ModulbankInternship.Accounts;
+using ModulbankInternship.Accounts.Interfaces;
 
 
 namespace ModulbankInternship.Users.Handlers;
 
-public class GetUserWalletsHandler(IMediator _mediator, IWalletsRepository walletsRepository)
-    : IRequestHandler<GetUserWalletsQuery, WalletModel[]>
+public class GetUserAccountsHandler(IMediator _mediator, IAccountsRepository AccountsRepository)
+    : IRequestHandler<GetUserAccountsQuery, AccountModel[]>
 {
-    public Task<WalletModel[]> Handle(GetUserWalletsQuery request, CancellationToken cancellationToken)
+    public Task<AccountModel[]> Handle(GetUserAccountsQuery request, CancellationToken cancellationToken)
     {
         _mediator.Send(new CheckExecutorAccessCommand(request.UserId, request.ExecutorId,
             new[] { EAccessClass.Manager }));
-        var wallets = walletsRepository.GetAllByOwner(request.UserId).ToArray();
-        return Task.FromResult(wallets);
+        var Accounts = AccountsRepository.GetAllByOwner(request.UserId).ToArray();
+        return Task.FromResult(Accounts);
     }
 }

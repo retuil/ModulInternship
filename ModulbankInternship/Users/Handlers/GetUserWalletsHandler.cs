@@ -14,9 +14,9 @@ public class GetUserAccountsHandler(IMediator _mediator, IAccountsRepository Acc
 {
     public Task<AccountModel[]> Handle(GetUserAccountsQuery request, CancellationToken cancellationToken)
     {
-        _mediator.Send(new CheckExecutorAccessCommand(request.UserId, request.ExecutorId,
-            new[] { EAccessClass.Manager }));
-        var Accounts = AccountsRepository.GetAllByOwner(request.UserId).ToArray();
-        return Task.FromResult(Accounts);
+        _mediator.Send(new CheckExecutorAccessCommand(request.UserId, request.Executor,
+            new[] { EAccessClass.Manager }), cancellationToken);
+        var accounts = AccountsRepository.GetAllByOwner(request.UserId).ToArray();
+        return Task.FromResult(accounts);
     }
 }

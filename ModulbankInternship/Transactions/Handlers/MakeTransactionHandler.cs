@@ -12,12 +12,12 @@ namespace ModulbankInternship.Transactions.Handlers;
 public class MakeTransactionHandler(IMediator _mediator, IAccountsRepository _AccountsRepository)
     : ICommandHandler<MakeTransactionCommand, Guid>
 {
-    public Task<Guid> Handle(MakeTransactionCommand request, CancellationToken cancellationToken)
+    public async Task<Guid> Handle(MakeTransactionCommand request, CancellationToken cancellationToken)
     {
         var newTransactionRequest = request.NewTransactionRequest;
         var ownerId = _AccountsRepository.Get(newTransactionRequest.AccountId).OwnerId;
-        _mediator.Send(new CheckExecutorAccessCommand(ownerId, request.ExecutorId,
-            new [] { EAccessClass.Manager, EAccessClass.Cashier }));
+        _mediator.Send(new CheckExecutorAccessCommand(ownerId, request.Executor,
+            new [] { EAccessClass.Manager, EAccessClass.Cashier }), cancellationToken);
         var newTransaction = new TransactionModel()
         {
             Amount = newTransactionRequest.Amount,
@@ -28,8 +28,8 @@ public class MakeTransactionHandler(IMediator _mediator, IAccountsRepository _Ac
             Type = newTransactionRequest.TransactionType,
             AccountId = newTransactionRequest.AccountId
         };
-        _mediator.Send(new AddTransactionToAccountCommand(newTransaction), cancellationToken);
-        var newTransactionId = _mediator.Send(new AddTransactionToRepositoryCommand(newTransaction), cancellationToken);
+        
+        var newTransactionId = await _mediator.Send(new NewTransactionCommand(newTransaction), cancellationToken);
         return newTransactionId;
     }
 }

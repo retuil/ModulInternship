@@ -1,9 +1,12 @@
+using System.Security.Claims;
 using System.Web.Http;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using ModulbankInternship.Auth;
-using ModulbankInternship.Auth.Exceptions;
 using ModulbankInternship.Accounts.Requests;
+using ModulbankInternship.Infrastructure;
+using ModulbankInternship.Users.DTO;
+using Guid = System.Guid;
 
 namespace ModulbankInternship.Account;
 
@@ -19,35 +22,68 @@ public class AccountsController(IMediator _mediator): ControllerBase
     /// <response code="200">Успешно. Данные получены</response>
     /// <response code="403">Отсутствуют права на просмотр счета</response>
     /// <response code="404">Счет отсутствует или закрыт</response>
+    [Authorize]
     [Microsoft.AspNetCore.Mvc.HttpGet]
     [Microsoft.AspNetCore.Mvc.Route("{id:guid}")]
-    public async Task<AccountModel> GetAccountById([FromUri] Guid id)
+    public async Task<MbResult<AccountModel>> GetAccountById([FromUri] Guid id)
     {
-        if (!Request.Cookies.TryGetValue(CookieConstants.UserId, out var executorId))
+        var executor = new ExecutorData()
         {
-            throw new UnauthorizedException();
-        }
-        var Account = await _mediator.Send(new GetAccountByIdQuery(id, Guid.Parse(executorId)));
-        return Account;
+            UserId = Guid.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value),
+            Role = User.FindFirst(ClaimTypes.Role)?.Value
+        };
+        
+        var account = await _mediator.Send(new GetAccountByIdQuery(id, executor));
+        return MbResult.Success(account);
     }
     
     /// <summary>
     /// Создать новый счет пользователю
     /// </summary>
-    /// <returns>Id созданного счета</returns>
+    /// <returns>Id созданного счета<see cref="MbResult{T}"/></returns>
     /// <response code="200">Успешно. Данные получены</response>
     /// <response code="403">У текущего аккаунта нет возможности создавать счет</response>
     /// <response code="404">Пользователь не найден</response>
+    [Authorize]
     [Microsoft.AspNetCore.Mvc.HttpPost]
     [Microsoft.AspNetCore.Mvc.Route("new")]
-    public async Task<Guid> CreateAccount([System.Web.Http.FromBody] NewAccountRequest request)
+    public async Task<MbResult<Guid>> CreateAccount([System.Web.Http.FromBody] NewAccountForAnyUserRequest request)
     {
-        if (!Request.Cookies.TryGetValue(CookieConstants.UserId, out var executorId))
+        var executor = new ExecutorData()
         {
-            throw new UnauthorizedException();
-        }
-        var newAccountId = await _mediator.Send(new CreateAccountCommand(request, Guid.Parse(executorId)));
-        return newAccountId;
+            UserId = Guid.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value),
+            Role = User.FindFirst(ClaimTypes.Role)?.Value
+        };
+        
+        var newAccountId = await _mediator.Send(new CreateAccountCommand(request, executor));
+        return MbResult.Success(newAccountId);
+    }
+    
+    /// <summary>
+    /// Создать новый счет текущему пользователю
+    /// </summary>
+    /// <returns>Id созданного счета<see cref="MbResult{T}"/></returns>
+    /// <response code="200">Успешно. Данные получены</response>
+    /// <response code="403">У текущего аккаунта нет возможности создавать счет</response>
+    /// <response code="404">Пользователь не найден</response>
+    [Authorize]
+    [Microsoft.AspNetCore.Mvc.HttpPost]
+    [Microsoft.AspNetCore.Mvc.Route("newForMe")]
+    public async Task<MbResult<Guid>> CreateAccountForCurrentUser([System.Web.Http.FromBody] NewAccountForCurrentUserRequest request)
+    {
+        var executor = new ExecutorData()
+        {
+            UserId = Guid.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value),
+            Role = User.FindFirst(ClaimTypes.Role)?.Value
+        };
+
+        var forAny = new NewAccountForAnyUserRequest()
+        {
+            AccountType = request.AccountType, InterestRate = request.InterestRate, Currency = request.Currency,
+            OwnerId = executor.UserId
+        };
+        var newAccountId = await _mediator.Send(new CreateAccountCommand(forAny, executor));
+        return MbResult.Success(newAccountId);
     }
 
     /// <summary>
@@ -59,19 +95,21 @@ public class AccountsController(IMediator _mediator): ControllerBase
     /// <response code="200">Успешно. Изменения внесены</response>
     /// <response code="403">Отсутствуют права на модификацию счета</response>
     /// <response code="404">Счет отсутствует или закрыт</response>
+    [Authorize]
     [Microsoft.AspNetCore.Mvc.HttpPatch]
     [Microsoft.AspNetCore.Mvc.Route("{id:guid}")]
-    public async Task<IActionResult> ModifyAccountParameters([FromUri] Guid id, [System.Web.Http.FromBody] ModifyAccountRequest request)
+    public async Task<MbResult<string>> ModifyAccountParameters([FromUri] Guid id, [System.Web.Http.FromBody] ModifyAccountRequest request)
     {
-        if (!Request.Cookies.TryGetValue(CookieConstants.UserId, out var executorId))
+        var executor = new ExecutorData()
         {
-            throw new UnauthorizedException();
-        }
+            UserId = Guid.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value),
+            Role = User.FindFirst(ClaimTypes.Role)?.Value
+        };
 
         var modifiedParameters =
-            await _mediator.Send(new ModifyAccountParametersCommand(id, request, Guid.Parse(executorId)));
+            await _mediator.Send(new ModifyAccountParametersCommand(id, request, executor));
         var changesRecord = string.Join(", ", modifiedParameters.Select(x => $"{x.Key}: {x.Value}"));
-        return Ok($"У счета id: {id} были изменены следующие параметры {changesRecord}");
+        return MbResult.Success($"У счета id: {id} были изменены следующие параметры {changesRecord}");
     }
 
     /// <summary>
@@ -82,17 +120,19 @@ public class AccountsController(IMediator _mediator): ControllerBase
     /// <response code="200">Успешно. Счет закрыт</response>
     /// <response code="403">Отсутствуют права на закрытие счета</response>
     /// <response code="404">Счет отсутствует или уже закрыт</response>
-    [Microsoft.AspNetCore.Mvc.HttpDelete]
+    [Authorize]
+    [Microsoft.AspNetCore.Mvc.HttpPost]
     [Microsoft.AspNetCore.Mvc.Route("{id:guid}")]
-    public async Task<IActionResult> CloseAccount([FromUri] Guid id)
+    public async Task<MbResult<string>> CloseAccount([FromUri] Guid id)
     {
-        if (!Request.Cookies.TryGetValue(CookieConstants.UserId, out var executorId))
+        var executor = new ExecutorData()
         {
-            throw new UnauthorizedException();
-        }
+            UserId = Guid.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value),
+            Role = User.FindFirst(ClaimTypes.Role)?.Value
+        };
 
-        await _mediator.Send(new CloseAccountCommand(id, Guid.Parse(executorId)));
-        return Ok($"Закрытие счета id:{id} успешно завершено");
+        await _mediator.Send(new CloseAccountCommand(id, executor));
+        return MbResult.Success($"Закрытие счета id:{id} успешно завершено");
     }
 
     /// <summary>
@@ -105,17 +145,20 @@ public class AccountsController(IMediator _mediator): ControllerBase
     /// <response code="200">Успешно</response>
     /// <response code="403">Отсутствуют права на заказ выписки по счету</response>
     /// <response code="404">Счет отсутствует или закрыт</response>
+    [Authorize]
     [Microsoft.AspNetCore.Mvc.HttpGet]
     [Microsoft.AspNetCore.Mvc.Route("{id:guid}/statement")]
-    public async Task<AccountStatementResponse> GetAccountStatement([FromUri] Guid id, [FromUri] DateTime startDate,
+    public async Task<MbResult<AccountStatementResponse>> GetAccountStatement([FromUri] Guid id, [FromUri] DateTime startDate,
         [FromUri] DateTime finishDate)
     {
-        if (!Request.Cookies.TryGetValue(CookieConstants.UserId, out var executorId))
+        var executor = new ExecutorData()
         {
-            throw new UnauthorizedException();
-        }
-        var response = await _mediator.Send(new GetAccountStatementQuery(id, startDate, finishDate, Guid.Parse(executorId)));
-        return response;
+            UserId = Guid.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value),
+            Role = User.FindFirst(ClaimTypes.Role)?.Value
+        };
+
+        var response = await _mediator.Send(new GetAccountStatementQuery(id, startDate, finishDate, executor));
+        return MbResult.Success(response);
     }
 
     /// <summary>
@@ -126,17 +169,19 @@ public class AccountsController(IMediator _mediator): ControllerBase
     /// <response code="200">Успешно</response>
     /// <response code="403">Отсутствуют права на создание перевода между данными счетами</response>
     /// <response code="404">Один из счетов отсутствует или закрыт</response>
+    [Authorize]
     [Microsoft.AspNetCore.Mvc.HttpPost]
     [Microsoft.AspNetCore.Mvc.Route("make_transfer")]
-    public async Task<IActionResult> MakeTransfer([System.Web.Http.FromBody] TransferRequest request)
+    public async Task<MbResult<string>> MakeTransfer([System.Web.Http.FromBody] TransferRequest request)
     {
-        if (!Request.Cookies.TryGetValue(CookieConstants.UserId, out var executorId))
+        var executor = new ExecutorData()
         {
-            throw new UnauthorizedException();
-        }
+            UserId = Guid.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value),
+            Role = User.FindFirst(ClaimTypes.Role)?.Value
+        };
 
-        await _mediator.Send(new MakeTransferCommand(request, Guid.Parse(executorId)));
-        return Ok(
+        await _mediator.Send(new MakeTransferCommand(request, executor));
+        return MbResult.Success(
             $"Перевод со счета id: {request.AccountId} на счет id: {request.CounterpartyAccountId} на сумму {request.Amount} проведет успешно");
     }
 }

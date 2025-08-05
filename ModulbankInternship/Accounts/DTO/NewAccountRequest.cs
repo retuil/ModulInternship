@@ -1,10 +1,7 @@
 namespace ModulbankInternship.Account;
 
-public class NewAccountRequest
+public abstract class NewAccountRequest
 {
-    /// <summary>Id владельца счета</summary>
-    public Guid OwnerId { get; set; }
-    
     /// <summary>Тип счета</summary>
     public EAccountType AccountType { get; set; }
     

@@ -13,10 +13,10 @@ public class GetAccountByIdHandler(IMediator _mediator, IAccountsRepository _Acc
 {
     public Task<AccountModel> Handle(GetAccountByIdQuery request, CancellationToken cancellationToken)
     {
-        var Account = _AccountsRepository.Get(request.AccountId);
-        _mediator.Send(new CheckExecutorAccessCommand(Account.OwnerId, request.ExecutorId,
-            new[] { EAccessClass.Owner, EAccessClass.Manager, EAccessClass.Cashier }));
+        var account = _AccountsRepository.Get(request.AccountId);
+        _mediator.Send(new CheckExecutorAccessCommand(account.OwnerId, request.Executor,
+            new[] { EAccessClass.Owner, EAccessClass.Manager, EAccessClass.Cashier }), cancellationToken);
 
-        return Task.FromResult(Account);
+        return Task.FromResult(account);
     }
 }

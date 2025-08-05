@@ -13,17 +13,17 @@ public class ModifyAccountParametersHandler(IMediator _mediator, IAccountsReposi
     public Task<Dictionary<string, string>> Handle(ModifyAccountParametersCommand request, CancellationToken cancellationToken)
     {
         var modifyAccountRequest = request.ModifyAccountRequest;
-        var Account = _AccountsRepository.Get(request.Id);
-        _mediator.Send(new CheckExecutorAccessCommand(Account.OwnerId, request.ExecutorId,
-            new[] { EAccessClass.Manager }));
+        var account = _AccountsRepository.Get(request.Id);
+        _mediator.Send(new CheckExecutorAccessCommand(account.OwnerId, request.Executor,
+            new[] { EAccessClass.Manager }), cancellationToken);
         var changeReport = new Dictionary<string, string>();
 
         if (modifyAccountRequest.NewInterestRate is not null)
         {
-            Account.InterestRate = modifyAccountRequest.NewInterestRate;
-            changeReport[nameof(Account.InterestRate)] = Account.InterestRate.ToString();
+            account.InterestRate = modifyAccountRequest.NewInterestRate;
+            changeReport[nameof(account.InterestRate)] = account.InterestRate.ToString();
         }
-        _AccountsRepository.Update(Account);
+        _AccountsRepository.Update(account);
 
         return Task.FromResult(changeReport);
     }

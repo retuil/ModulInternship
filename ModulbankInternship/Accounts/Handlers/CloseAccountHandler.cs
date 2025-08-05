@@ -16,14 +16,15 @@ public class CloseAccountHandler(IMediator _mediator, IAccountsRepository _Accou
 {
     public Task<bool> Handle(CloseAccountCommand request, CancellationToken cancellationToken)
     {
-        var Account = _AccountsRepository.Get(request.AccountId);
-        _mediator.Send(new CheckExecutorAccessCommand(Account.OwnerId, request.ExecutorId,
-                    new[] { EAccessClass.Owner, EAccessClass.Manager }));
-        if (!Account.IsExist)
+        var account = _AccountsRepository.Get(request.AccountId);
+        if (account is null || !account.IsExist)
         {
             throw new ResourceNotFoundException($"No open Account with id: {request.AccountId}");
         }
-
+        
+        _mediator.Send(new CheckExecutorAccessCommand(account.OwnerId, request.Executor,
+                    new[] { EAccessClass.Owner, EAccessClass.Manager }), cancellationToken);
+        
         _AccountsRepository.Delete(request.AccountId);
         return Task.FromResult(true);
     }

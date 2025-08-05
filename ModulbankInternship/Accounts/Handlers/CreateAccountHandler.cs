@@ -13,8 +13,8 @@ public class CreateAccountHandler(IMediator _mediator, IAccountsRepository _Acco
     public Task<Guid> Handle(CreateAccountCommand request, CancellationToken cancellationToken)
     {
         var newAccountRequest = request.NewAccountRequest;
-        _mediator.Send(new CheckExecutorAccessCommand(newAccountRequest.OwnerId, request.ExecutorId,
-            new[] { EAccessClass.Owner, EAccessClass.Manager }));
+        _mediator.Send(new CheckExecutorAccessCommand(newAccountRequest.OwnerId, request.Executor,
+            new[] { EAccessClass.Owner, EAccessClass.Manager }), cancellationToken);
 
         var newAccountId = _AccountsRepository.Add(new AccountModel()
         {

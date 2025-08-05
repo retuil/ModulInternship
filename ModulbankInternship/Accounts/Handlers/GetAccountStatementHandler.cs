@@ -15,11 +15,11 @@ public class GetAccountStatementHandler(IMediator _mediator, IAccountsRepository
     {
         var startDate = request.StartDate;
         var finishDate = request.FinishDate;
-        var Account = _AccountsRepository.Get(request.AccountId);
-        _mediator.Send(new CheckExecutorAccessCommand(Account.OwnerId, request.ExecutorId,
-            new[] { EAccessClass.Owner, EAccessClass.Manager }));
+        var account = _AccountsRepository.Get(request.AccountId);
+        _mediator.Send(new CheckExecutorAccessCommand(account.OwnerId, request.Executor,
+            new[] { EAccessClass.Owner, EAccessClass.Manager }), cancellationToken);
         
-        var statementTransactions = Account.Transactions
+        var statementTransactions = account.Transactions
             .Where(t => t.DateTime >= startDate && t.DateTime <= finishDate);
         var response = new AccountStatementResponse()
         {

@@ -5,24 +5,24 @@ using ModulbankInternship.Accounts.Requests;
 
 namespace ModulbankInternship.Accounts;
 
-public class AddTransactionToAccountHandler(IAccountsRepository _AccountsRepository)
+public class AddTransactionToAccountHandler(IAccountsRepository accountsRepository)
     : ICommandHandler<AddTransactionToAccountCommand, bool>
 {
     public Task<bool> Handle(AddTransactionToAccountCommand request, CancellationToken cancellationToken)
     {
         var transaction = request.TransactionModel;
-        var Account = _AccountsRepository.Get(transaction.AccountId);
-        Account.Transactions.Add(transaction);
+        var account = accountsRepository.Get(transaction.AccountId);
+        account.Transactions.Add(transaction);
         switch (transaction.Type)
         {
             case ETransactionType.Credit:
             {
-                Account.Balance -= transaction.Amount;
+                account.Balance -= transaction.Amount;
                 break;
             }
             case ETransactionType.Debit:
             {
-                Account.Balance += transaction.Amount;
+                account.Balance += transaction.Amount;
                 break;
             }
             default:
@@ -31,7 +31,7 @@ public class AddTransactionToAccountHandler(IAccountsRepository _AccountsReposit
             }
         }
 
-        _AccountsRepository.Update(Account);
+        accountsRepository.Update(account);
         return Task.FromResult(true);
     }
 }

@@ -3,11 +3,10 @@ using System.Web.Http;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using ModulbankInternship.Auth;
-using ModulbankInternship.Auth.Exceptions;
 using ModulbankInternship.Infrastructure;
+using ModulbankInternship.Infrastructure.DTO;
 using ModulbankInternship.Transactions.DTO;
 using ModulbankInternship.Transactions.Requests;
-using ModulbankInternship.Users.DTO;
 
 namespace ModulbankInternship.Transactions;
 

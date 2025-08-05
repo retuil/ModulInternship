@@ -1,7 +1,8 @@
-using ModulbankInternship.Account.Exceptions;
 using ModulbankInternship.Infrastructure;
 using ModulbankInternship.Transactions.Models;
 using ModulbankInternship.Accounts.Interfaces;
+using ModulbankInternship.Infrastructure.Exceptions;
+using ModulbankInternship.Transactions.Interfaces;
 
 namespace ModulbankInternship.Transactions;
 
@@ -20,9 +21,9 @@ public class TransactionsRepository : BaseRepository<TransactionModel>, ITransac
 
     public Guid Add(TransactionModel model)
     {
-        maxId = IndexHelper.NextGuid(maxId);
-        model.Id = maxId;
-        dataBase.Add(model);
+        MaxId = IndexHelper.NextGuid(MaxId);
+        model.Id = MaxId;
+        DataBase.Add(model);
         return model.Id;
     }
 

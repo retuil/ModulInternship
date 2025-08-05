@@ -2,17 +2,18 @@ using System.Security.Claims;
 using System.Web.Http;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
-using ModulbankInternship.Auth;
+using ModulbankInternship.Accounts.DTO;
+using ModulbankInternship.Accounts.Models;
 using ModulbankInternship.Accounts.Requests;
 using ModulbankInternship.Infrastructure;
-using ModulbankInternship.Users.DTO;
+using ModulbankInternship.Infrastructure.DTO;
 using Guid = System.Guid;
 
-namespace ModulbankInternship.Account;
+namespace ModulbankInternship.Accounts;
 
 [ApiController]
 [Microsoft.AspNetCore.Mvc.Route("Accounts")]
-public class AccountsController(IMediator _mediator): ControllerBase
+public class AccountsController(IMediator mediator): ControllerBase
 {
     /// <summary>
     /// Получить данные счета по id
@@ -33,7 +34,7 @@ public class AccountsController(IMediator _mediator): ControllerBase
             Role = User.FindFirst(ClaimTypes.Role)?.Value
         };
         
-        var account = await _mediator.Send(new GetAccountByIdQuery(id, executor));
+        var account = await mediator.Send(new GetAccountByIdQuery(id, executor));
         return MbResult.Success(account);
     }
     
@@ -55,7 +56,7 @@ public class AccountsController(IMediator _mediator): ControllerBase
             Role = User.FindFirst(ClaimTypes.Role)?.Value
         };
         
-        var newAccountId = await _mediator.Send(new CreateAccountCommand(request, executor));
+        var newAccountId = await mediator.Send(new CreateAccountCommand(request, executor));
         return MbResult.Success(newAccountId);
     }
     
@@ -82,7 +83,7 @@ public class AccountsController(IMediator _mediator): ControllerBase
             AccountType = request.AccountType, InterestRate = request.InterestRate, Currency = request.Currency,
             OwnerId = executor.UserId
         };
-        var newAccountId = await _mediator.Send(new CreateAccountCommand(forAny, executor));
+        var newAccountId = await mediator.Send(new CreateAccountCommand(forAny, executor));
         return MbResult.Success(newAccountId);
     }
 
@@ -107,7 +108,7 @@ public class AccountsController(IMediator _mediator): ControllerBase
         };
 
         var modifiedParameters =
-            await _mediator.Send(new ModifyAccountParametersCommand(id, request, executor));
+            await mediator.Send(new ModifyAccountParametersCommand(id, request, executor));
         var changesRecord = string.Join(", ", modifiedParameters.Select(x => $"{x.Key}: {x.Value}"));
         return MbResult.Success($"У счета id: {id} были изменены следующие параметры {changesRecord}");
     }
@@ -131,7 +132,7 @@ public class AccountsController(IMediator _mediator): ControllerBase
             Role = User.FindFirst(ClaimTypes.Role)?.Value
         };
 
-        await _mediator.Send(new CloseAccountCommand(id, executor));
+        await mediator.Send(new CloseAccountCommand(id, executor));
         return MbResult.Success($"Закрытие счета id:{id} успешно завершено");
     }
 
@@ -157,7 +158,7 @@ public class AccountsController(IMediator _mediator): ControllerBase
             Role = User.FindFirst(ClaimTypes.Role)?.Value
         };
 
-        var response = await _mediator.Send(new GetAccountStatementQuery(id, startDate, finishDate, executor));
+        var response = await mediator.Send(new GetAccountStatementQuery(id, startDate, finishDate, executor));
         return MbResult.Success(response);
     }
 
@@ -180,7 +181,7 @@ public class AccountsController(IMediator _mediator): ControllerBase
             Role = User.FindFirst(ClaimTypes.Role)?.Value
         };
 
-        await _mediator.Send(new MakeTransferCommand(request, executor));
+        await mediator.Send(new MakeTransferCommand(request, executor));
         return MbResult.Success(
             $"Перевод со счета id: {request.AccountId} на счет id: {request.CounterpartyAccountId} на сумму {request.Amount} проведет успешно");
     }

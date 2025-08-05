@@ -1,6 +1,6 @@
 using System.Text.Json.Serialization;
 
-namespace ModulbankInternship.Account;
+namespace ModulbankInternship.Accounts.Enums;
 
 [JsonConverter(typeof(JsonStringEnumConverter))]
 public enum EAccountType

@@ -1,15 +1,15 @@
-using ModulbankInternship.Account;
+using ModulbankInternship.Infrastructure.Interfaces;
 
 namespace ModulbankInternship.Infrastructure;
 
 public class BaseRepository<TModel>
 where TModel: IModel
 {
-    protected readonly List<TModel> dataBase = [];
-    protected Guid maxId;
+    protected readonly List<TModel> DataBase = [];
+    protected Guid MaxId;
     
     protected TModel? GetExistModel(Guid id)
     {
-        return dataBase.Where(v => v.IsExist).FirstOrDefault(v => v.Id == id);
+        return DataBase.Where(v => v.IsExist).FirstOrDefault(v => v.Id == id);
     }
 }

@@ -1,5 +1,6 @@
-using ModulbankInternship.Account;
+using ModulbankInternship.Accounts.Models;
 using ModulbankInternship.Infrastructure;
+using ModulbankInternship.Infrastructure.Interfaces;
 
 namespace ModulbankInternship.Accounts.Interfaces;
 

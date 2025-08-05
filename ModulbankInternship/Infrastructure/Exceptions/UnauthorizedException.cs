@@ -1,4 +1,4 @@
-namespace ModulbankInternship.Auth.Exceptions;
+namespace ModulbankInternship.Infrastructure.Exceptions;
 
 public class UnauthorizedException: Exception
 { }

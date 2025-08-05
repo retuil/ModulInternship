@@ -1,11 +1,12 @@
 using MediatR;
-using ModulbankInternship.Auth.Enums;
 using ModulbankInternship.Infrastructure;
 using ModulbankInternship.Transactions.Models;
 using ModulbankInternship.Transactions.Requests;
 using ModulbankInternship.Users.Requests;
 using ModulbankInternship.Accounts.Interfaces;
 using ModulbankInternship.Accounts.Requests;
+using ModulbankInternship.Infrastructure.Interfaces;
+using ModulbankInternship.Users.Enums;
 
 namespace ModulbankInternship.Transactions.Handlers;
 
@@ -16,7 +17,7 @@ public class MakeTransactionHandler(IMediator _mediator, IAccountsRepository _Ac
     {
         var newTransactionRequest = request.NewTransactionRequest;
         var ownerId = _AccountsRepository.Get(newTransactionRequest.AccountId).OwnerId;
-        _mediator.Send(new CheckExecutorAccessCommand(ownerId, request.Executor,
+        await _mediator.Send(new CheckExecutorAccessCommand(ownerId, request.Executor,
             new [] { EAccessClass.Manager, EAccessClass.Cashier }), cancellationToken);
         var newTransaction = new TransactionModel()
         {

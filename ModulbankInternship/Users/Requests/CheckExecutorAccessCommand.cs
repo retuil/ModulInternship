@@ -1,7 +1,8 @@
 using Abp.Events.Bus.Exceptions;
-using ModulbankInternship.Auth.Enums;
 using ModulbankInternship.Infrastructure;
-using ModulbankInternship.Users.DTO;
+using ModulbankInternship.Infrastructure.DTO;
+using ModulbankInternship.Infrastructure.Interfaces;
+using ModulbankInternship.Users.Enums;
 
 namespace ModulbankInternship.Users.Requests;
 

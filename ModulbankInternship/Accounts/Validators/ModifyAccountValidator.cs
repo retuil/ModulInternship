@@ -1,5 +1,6 @@
 using FluentValidation;
 using ModulbankInternship.Account;
+using ModulbankInternship.Accounts.DTO;
 using Swashbuckle.AspNetCore.SwaggerUI;
 
 namespace ModulbankInternship.Accounts.Validators;

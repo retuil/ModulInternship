@@ -1,5 +1,4 @@
-using ModulbankInternship.Account.Exceptions;
-using ModulbankInternship.Users.Exceptions;
+using ModulbankInternship.Infrastructure.Exceptions;
 
 namespace ModulbankInternship;
 

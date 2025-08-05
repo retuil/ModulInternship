@@ -1,6 +1,7 @@
 using ModulbankInternship.Infrastructure;
+using ModulbankInternship.Infrastructure.DTO;
+using ModulbankInternship.Infrastructure.Interfaces;
 using ModulbankInternship.Transactions.DTO;
-using ModulbankInternship.Users.DTO;
 
 namespace ModulbankInternship.Transactions.Requests;
 

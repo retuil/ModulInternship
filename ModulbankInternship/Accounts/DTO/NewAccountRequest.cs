@@ -1,4 +1,7 @@
-namespace ModulbankInternship.Account;
+using ModulbankInternship.Account;
+using ModulbankInternship.Accounts.Enums;
+
+namespace ModulbankInternship.Accounts.DTO;
 
 public abstract class NewAccountRequest
 {

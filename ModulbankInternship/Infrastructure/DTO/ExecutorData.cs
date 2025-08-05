@@ -1,6 +1,4 @@
-using ModulbankInternship.Users.Enums;
-
-namespace ModulbankInternship.Users.DTO;
+namespace ModulbankInternship.Infrastructure.DTO;
 
 public class ExecutorData
 {

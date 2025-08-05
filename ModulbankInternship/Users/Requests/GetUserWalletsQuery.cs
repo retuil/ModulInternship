@@ -1,7 +1,6 @@
-using MediatR;
-using ModulbankInternship.Account;
-using ModulbankInternship.Infrastructure;
-using ModulbankInternship.Users.DTO;
+using ModulbankInternship.Accounts.Models;
+using ModulbankInternship.Infrastructure.DTO;
+using ModulbankInternship.Infrastructure.Interfaces;
 
 namespace ModulbankInternship.Users.Requests;
 

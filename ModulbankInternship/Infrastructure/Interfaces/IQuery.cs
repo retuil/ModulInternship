@@ -1,6 +1,6 @@
 using MediatR;
 
-namespace ModulbankInternship.Infrastructure;
+namespace ModulbankInternship.Infrastructure.Interfaces;
 
 public interface IQuery<out TResponse>: IRequest<TResponse>
 { }

@@ -1,7 +1,7 @@
-using ModulbankInternship.Account;
-using ModulbankInternship.Account.Exceptions;
 using ModulbankInternship.Infrastructure;
 using ModulbankInternship.Accounts.Interfaces;
+using ModulbankInternship.Accounts.Models;
+using ModulbankInternship.Infrastructure.Exceptions;
 
 namespace ModulbankInternship.Accounts;
 
@@ -20,9 +20,9 @@ public class AccountsRepository: BaseRepository<AccountModel>, IAccountsReposito
 
     public Guid Add(AccountModel model)
     {
-        maxId = IndexHelper.NextGuid(maxId);
-        model.Id = maxId;
-        dataBase.Add(model);
+        MaxId = IndexHelper.NextGuid(MaxId);
+        model.Id = MaxId;
+        DataBase.Add(model);
         return model.Id;
     }
 
@@ -39,13 +39,13 @@ public class AccountsRepository: BaseRepository<AccountModel>, IAccountsReposito
 
     public void Update(AccountModel model)
     {
-        var position = dataBase.FindIndex(v => v.Id == model.Id);
-        dataBase[position] = model;
+        var position = DataBase.FindIndex(v => v.Id == model.Id);
+        DataBase[position] = model;
     }
 
 
     public AccountModel[] GetAllByOwner(Guid ownerId)
     {
-        return dataBase.Where(w => w.OwnerId == ownerId).ToArray();
+        return DataBase.Where(w => w.OwnerId == ownerId).ToArray();
     }
 }

@@ -1,8 +1,7 @@
-using ModulbankInternship.Infrastructure;
-using ModulbankInternship.Transactions;
+using ModulbankInternship.Infrastructure.Interfaces;
 using ModulbankInternship.Transactions.Models;
 
-namespace ModulbankInternship.Accounts.Interfaces;
+namespace ModulbankInternship.Transactions.Interfaces;
 
 public interface ITransactionsRepository: IRepository<TransactionModel>
 {}

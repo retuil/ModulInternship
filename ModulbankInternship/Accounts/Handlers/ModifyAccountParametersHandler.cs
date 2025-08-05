@@ -1,20 +1,21 @@
 using MediatR;
-using ModulbankInternship.Auth.Enums;
-using ModulbankInternship.Infrastructure;
-using ModulbankInternship.Users.Requests;
 using ModulbankInternship.Accounts.Interfaces;
 using ModulbankInternship.Accounts.Requests;
+using ModulbankInternship.Infrastructure;
+using ModulbankInternship.Infrastructure.Interfaces;
+using ModulbankInternship.Users.Enums;
+using ModulbankInternship.Users.Requests;
 
-namespace ModulbankInternship.Accounts;
+namespace ModulbankInternship.Accounts.Handlers;
 
-public class ModifyAccountParametersHandler(IMediator _mediator, IAccountsRepository _AccountsRepository)
+public class ModifyAccountParametersHandler(IMediator mediator, IAccountsRepository accountsRepository)
     : ICommandHandler<ModifyAccountParametersCommand, Dictionary<string, string>>
 {
     public Task<Dictionary<string, string>> Handle(ModifyAccountParametersCommand request, CancellationToken cancellationToken)
     {
         var modifyAccountRequest = request.ModifyAccountRequest;
-        var account = _AccountsRepository.Get(request.Id);
-        _mediator.Send(new CheckExecutorAccessCommand(account.OwnerId, request.Executor,
+        var account = accountsRepository.Get(request.Id);
+        mediator.Send(new CheckExecutorAccessCommand(account.OwnerId, request.Executor,
             new[] { EAccessClass.Manager }), cancellationToken);
         var changeReport = new Dictionary<string, string>();
 
@@ -23,7 +24,7 @@ public class ModifyAccountParametersHandler(IMediator _mediator, IAccountsReposi
             account.InterestRate = modifyAccountRequest.NewInterestRate;
             changeReport[nameof(account.InterestRate)] = account.InterestRate.ToString();
         }
-        _AccountsRepository.Update(account);
+        accountsRepository.Update(account);
 
         return Task.FromResult(changeReport);
     }

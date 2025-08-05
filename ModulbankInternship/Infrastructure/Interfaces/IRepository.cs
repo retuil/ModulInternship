@@ -1,4 +1,4 @@
-namespace ModulbankInternship.Infrastructure;
+namespace ModulbankInternship.Infrastructure.Interfaces;
 
 public interface IRepository<TModel>
 {

@@ -2,12 +2,9 @@ using System.Security.Claims;
 using System.Web.Http;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
-using ModulbankInternship.Account;
-using ModulbankInternship.Auth;
-using ModulbankInternship.Auth.Exceptions;
+using ModulbankInternship.Accounts.Models;
 using ModulbankInternship.Infrastructure;
-using ModulbankInternship.Users.DTO;
-using ModulbankInternship.Users.Models;
+using ModulbankInternship.Infrastructure.DTO;
 using ModulbankInternship.Users.Requests;
 
 namespace ModulbankInternship.Users;

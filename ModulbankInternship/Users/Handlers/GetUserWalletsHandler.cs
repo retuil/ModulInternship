@@ -1,22 +1,20 @@
 using MediatR;
-using ModulbankInternship.Account;
-using ModulbankInternship.Auth.Enums;
-using ModulbankInternship.Users;
 using ModulbankInternship.Users.Requests;
-using ModulbankInternship.Accounts;
 using ModulbankInternship.Accounts.Interfaces;
+using ModulbankInternship.Accounts.Models;
+using ModulbankInternship.Users.Enums;
 
 
 namespace ModulbankInternship.Users.Handlers;
 
-public class GetUserAccountsHandler(IMediator _mediator, IAccountsRepository AccountsRepository)
+public class GetUserAccountsHandler(IMediator mediator, IAccountsRepository accountsRepository)
     : IRequestHandler<GetUserAccountsQuery, AccountModel[]>
 {
     public Task<AccountModel[]> Handle(GetUserAccountsQuery request, CancellationToken cancellationToken)
     {
-        _mediator.Send(new CheckExecutorAccessCommand(request.UserId, request.Executor,
+        mediator.Send(new CheckExecutorAccessCommand(request.UserId, request.Executor,
             new[] { EAccessClass.Manager }), cancellationToken);
-        var accounts = AccountsRepository.GetAllByOwner(request.UserId).ToArray();
+        var accounts = accountsRepository.GetAllByOwner(request.UserId).ToArray();
         return Task.FromResult(accounts);
     }
 }

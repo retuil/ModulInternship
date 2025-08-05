@@ -1,7 +1,6 @@
-using ModulbankInternship.Transactions;
 using ModulbankInternship.Transactions.Models;
 
-namespace ModulbankInternship.Account;
+namespace ModulbankInternship.Accounts.DTO;
 
 public class AccountStatementResponse
 {

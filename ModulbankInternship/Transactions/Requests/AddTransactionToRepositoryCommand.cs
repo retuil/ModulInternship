@@ -1,4 +1,5 @@
 using ModulbankInternship.Infrastructure;
+using ModulbankInternship.Infrastructure.Interfaces;
 using ModulbankInternship.Transactions.Models;
 
 namespace ModulbankInternship.Transactions.Requests;

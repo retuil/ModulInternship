@@ -1,10 +1,9 @@
-using System.Transactions;
+using ModulbankInternship.Accounts.Enums;
 using ModulbankInternship.Infrastructure;
-using ModulbankInternship.Transactions;
-using ModulbankInternship.Transactions;
+using ModulbankInternship.Infrastructure.Interfaces;
 using ModulbankInternship.Transactions.Models;
 
-namespace ModulbankInternship.Account;
+namespace ModulbankInternship.Accounts.Models;
 
 public class AccountModel: IModel
 {
@@ -36,5 +35,5 @@ public class AccountModel: IModel
     public DateTime? ClosingDate { get; set; }
     
     /// <summary>Список транзакций по счету</summary>
-    public List<TransactionModel> Transactions { get; set; } = new List<TransactionModel>();
+    public List<TransactionModel> Transactions { get; set; } = [];
 }

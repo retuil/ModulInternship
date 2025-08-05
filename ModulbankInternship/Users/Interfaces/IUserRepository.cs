@@ -1,4 +1,5 @@
 using ModulbankInternship.Infrastructure;
+using ModulbankInternship.Infrastructure.Interfaces;
 using ModulbankInternship.Users.Models;
 
 namespace ModulbankInternship.Users.Interfaces;

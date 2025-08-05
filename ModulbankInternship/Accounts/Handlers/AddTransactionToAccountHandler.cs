@@ -1,9 +1,10 @@
-using ModulbankInternship.Infrastructure;
-using ModulbankInternship.Transactions.Enums;
 using ModulbankInternship.Accounts.Interfaces;
 using ModulbankInternship.Accounts.Requests;
+using ModulbankInternship.Infrastructure;
+using ModulbankInternship.Infrastructure.Interfaces;
+using ModulbankInternship.Transactions.Enums;
 
-namespace ModulbankInternship.Accounts;
+namespace ModulbankInternship.Accounts.Handlers;
 
 public class AddTransactionToAccountHandler(IAccountsRepository accountsRepository)
     : ICommandHandler<AddTransactionToAccountCommand, bool>

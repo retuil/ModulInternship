@@ -12,12 +12,13 @@ using ModulbankInternship.Users.Interfaces;
 using ModulbankInternship.Accounts;
 using ModulbankInternship.Accounts.Interfaces;
 using ModulbankInternship.Accounts.Validators;
+using ModulbankInternship.Transactions.Interfaces;
 
 namespace ModulbankInternship;
 
 public static class Registration
 {
-    public static void RegisterMediatR(WebApplicationBuilder? builder)
+    public static void RegisterMediatR(WebApplicationBuilder builder)
     {
         builder.Services.AddMediatR(cfg =>
         {
@@ -45,7 +46,7 @@ public static class Registration
             cfg.RegisterServicesFromAssemblyContaining<NewTransactionValidator>();
         });
     }
-    public static void RegisterValidators(WebApplicationBuilder? builder)
+    public static void RegisterValidators(WebApplicationBuilder builder)
     {
         ValidatorOptions.Global.DefaultClassLevelCascadeMode = CascadeMode.Continue;
         ValidatorOptions.Global.DefaultRuleLevelCascadeMode = CascadeMode.Stop;
@@ -70,7 +71,7 @@ public static class Registration
         builder.Services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>));
     }
 
-    public static void RegistryInjections(WebApplicationBuilder? builder)
+    public static void RegistryInjections(WebApplicationBuilder builder)
     {
         builder.Services.AddSingleton<ITransactionsRepository, TransactionsRepository>();
         builder.Services.AddSingleton<IAccountsRepository, AccountsRepository>();

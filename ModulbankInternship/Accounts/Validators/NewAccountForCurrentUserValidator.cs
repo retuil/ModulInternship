@@ -1,5 +1,4 @@
 using FluentValidation;
-using ModulbankInternship.Account;
 using ModulbankInternship.Accounts.DTO;
 
 namespace ModulbankInternship.Accounts.Validators;

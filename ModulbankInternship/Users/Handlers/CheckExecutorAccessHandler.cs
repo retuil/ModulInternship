@@ -2,12 +2,11 @@ using ModulbankInternship.Infrastructure;
 using ModulbankInternship.Infrastructure.Exceptions;
 using ModulbankInternship.Infrastructure.Interfaces;
 using ModulbankInternship.Users.Enums;
-using ModulbankInternship.Users.Interfaces;
 using ModulbankInternship.Users.Requests;
 
 namespace ModulbankInternship.Users.Handlers;
 
-public class CheckExecutorAccessHandler(IUserRepository userRepository)
+public class CheckExecutorAccessHandler
     : ICommandHandler<CheckExecutorAccessCommand, bool>
 {
     public Task<bool> Handle(CheckExecutorAccessCommand request, CancellationToken cancellationToken)

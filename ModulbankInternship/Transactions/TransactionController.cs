@@ -2,7 +2,6 @@ using System.Security.Claims;
 using System.Web.Http;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
-using ModulbankInternship.Auth;
 using ModulbankInternship.Infrastructure;
 using ModulbankInternship.Infrastructure.DTO;
 using ModulbankInternship.Transactions.DTO;
@@ -12,7 +11,7 @@ namespace ModulbankInternship.Transactions;
 
 [ApiController]
 [Microsoft.AspNetCore.Mvc.Route("transactions")]
-public class TransactionController(IMediator _mediator)
+public class TransactionController(IMediator mediator)
     : ControllerBase
 {
     /// <summary>
@@ -33,7 +32,7 @@ public class TransactionController(IMediator _mediator)
             UserId = Guid.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value),
             Role = User.FindFirst(ClaimTypes.Role)?.Value
         };
-        var transactionId = await _mediator.Send(new MakeTransactionCommand(request, executor));
+        var transactionId = await mediator.Send(new MakeTransactionCommand(request, executor));
         return MbResult.Success(transactionId);
     }
 }

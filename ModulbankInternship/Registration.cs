@@ -7,8 +7,6 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using ModulbankInternship.Transactions;
 using ModulbankInternship.Transactions.Validators;
-using ModulbankInternship.Users;
-using ModulbankInternship.Users.Interfaces;
 using ModulbankInternship.Accounts;
 using ModulbankInternship.Accounts.Interfaces;
 using ModulbankInternship.Accounts.Validators;

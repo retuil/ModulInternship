@@ -1,30 +1,30 @@
-using ModulbankInternship.Auth.Enums;
-using ModulbankInternship.Auth.Exceptions;
 using ModulbankInternship.Infrastructure;
+using ModulbankInternship.Infrastructure.Exceptions;
+using ModulbankInternship.Infrastructure.Interfaces;
 using ModulbankInternship.Users.Enums;
-using ModulbankInternship.Users.Exceptions;
-using ModulbankInternship.Users.Interfaces;
 using ModulbankInternship.Users.Requests;
 
 namespace ModulbankInternship.Users.Handlers;
 
-public class CheckExecutorAccessHandler(IUserRepository userRepository)
+public class CheckExecutorAccessHandler
     : ICommandHandler<CheckExecutorAccessCommand, bool>
 {
     public Task<bool> Handle(CheckExecutorAccessCommand request, CancellationToken cancellationToken)
     {
-        var executor = userRepository.Get(request.ExecutorId);
-        if (executor is null)
+        if (request.Executor.Role is null)
         {
-            throw new UnauthorizedException();
+            throw new ForbiddenException($"The user Id: {request.Executor.UserId} does not have a role");
         }
+
+        var executorRole = ConvertRoleToEnum(request.Executor.Role);
+        
         foreach (var accessClass in request.AccessClasses)
         {
             switch (accessClass)
             {
-                case EAccessClass.Manager when executor.Role == EUserRole.Manager:
-                case EAccessClass.Cashier when executor.Role == EUserRole.Cashier:
-                case EAccessClass.Owner when request.OwnerId == request.ExecutorId:
+                case EAccessClass.Manager when executorRole == EUserRole.Manager:
+                case EAccessClass.Cashier when executorRole == EUserRole.Cashier:
+                case EAccessClass.Owner when request.OwnerId == request.Executor.UserId:
                 case EAccessClass.Anyone:
                 {
                     return Task.FromResult(true);
@@ -36,6 +36,17 @@ public class CheckExecutorAccessHandler(IUserRepository userRepository)
             }
         }
 
-        throw new ForbiddenException($"No access rights for user id: {request.ExecutorId} when make action with a resource owned by id: {request.OwnerId}. User role: {executor.Role}. Required role: {string.Join(@"\", request.AccessClasses.Select(x => x.ToString()))}");
+        throw new ForbiddenException($"No access rights for user id: {request.Executor.UserId} when make action with a resource owned by id: {request.OwnerId}. User role: {executorRole}. Required role: {string.Join(@"\", request.AccessClasses.Select(x => x.ToString()))}");
+    }
+
+    private static EUserRole ConvertRoleToEnum(string? stringRole)
+    {
+        return stringRole switch
+        {
+            "Manager" => EUserRole.Manager,
+            "Cashier" => EUserRole.Cashier,
+            "Client" => EUserRole.Client,
+            _ => throw new NotImplementedException($"Role {stringRole} is not implemented")
+        };
     }
 }

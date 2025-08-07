@@ -1,5 +1,5 @@
-using ModulbankInternship.Account.Exceptions;
-using ModulbankInternship.Users.Exceptions;
+using ModulbankInternship.Infrastructure;
+using ModulbankInternship.Infrastructure.Exceptions;
 
 namespace ModulbankInternship;
 
@@ -16,11 +16,7 @@ public class ValidationExceptionMiddleware(RequestDelegate next)
             context.Response.StatusCode = 400;
             context.Response.ContentType = "application/json";
 
-            var response = new
-            {
-                message = "Validation failed",
-                errors = ex.Errors.Select(e => new { field = e.PropertyName, error = e.ErrorMessage })
-            };
+            var response = MbResult.Failure<bool>("400", "Validation failed");
 
             await context.Response.WriteAsJsonAsync(response);
         }
@@ -29,11 +25,7 @@ public class ValidationExceptionMiddleware(RequestDelegate next)
             context.Response.StatusCode = 403;
             context.Response.ContentType = "application/json";
 
-            var response = new
-            {
-                message = ex.Message,
-                error = "Forbidden Exception"
-            };
+            var response = MbResult.Failure<bool>("403", ex.Message);
 
             await context.Response.WriteAsJsonAsync(response);
         }
@@ -42,11 +34,7 @@ public class ValidationExceptionMiddleware(RequestDelegate next)
             context.Response.StatusCode = 404;
             context.Response.ContentType = "application/json";
 
-            var response = new
-            {
-                message = ex.Message,
-                error = "Not Found Error"
-            };
+            var response = MbResult.Failure<bool>("404", ex.Message);
 
             await context.Response.WriteAsJsonAsync(response);
         }

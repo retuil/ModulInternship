@@ -1,6 +1,8 @@
 using ModulbankInternship.Infrastructure;
 using ModulbankInternship.Transactions.Requests;
-using ModulbankInternship.Wallets.Interfaces;
+using ModulbankInternship.Accounts.Interfaces;
+using ModulbankInternship.Infrastructure.Interfaces;
+using ModulbankInternship.Transactions.Interfaces;
 
 namespace ModulbankInternship.Transactions.Handlers;
 

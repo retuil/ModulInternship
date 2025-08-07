@@ -1,43 +1,15 @@
+using ModulbankInternship.Infrastructure.Interfaces;
+
 namespace ModulbankInternship.Infrastructure;
 
-public class BaseRepository<TModel>: IRepository<TModel>
+public class BaseRepository<TModel>
 where TModel: IModel
 {
-    protected readonly List<TModel> dataBase = [];
-    protected Guid maxId;
+    protected readonly List<TModel> DataBase = [];
+    protected Guid MaxId;
     
-    public virtual TModel? Get(Guid id)
-    {
-        return GetExistModel(id);
-    }
-
-    public virtual Guid Add(TModel model)
-    {
-        maxId = IndexHelper.NextGuid(maxId);
-        model.Id = maxId;
-        dataBase.Add(model);
-        return model.Id;
-    }
-
-    public virtual void Delete(Guid id)
-    {
-        var model = GetExistModel(id);
-        if (model is null)
-        {
-            return;
-        }
-
-        model.IsExist = false;
-    }
-
-    public virtual void Update(TModel model)
-    {
-        var position = dataBase.FindIndex(v => v.Id == model.Id);
-        dataBase[position] = model;
-    }
-
     protected TModel? GetExistModel(Guid id)
     {
-        return dataBase.Where(v => v.IsExist).FirstOrDefault(v => v.Id == id);
+        return DataBase.Where(v => v.IsExist).FirstOrDefault(v => v.Id == id);
     }
 }

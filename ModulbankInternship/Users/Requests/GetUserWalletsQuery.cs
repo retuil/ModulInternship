@@ -1,7 +1,7 @@
-using MediatR;
-using ModulbankInternship.Account;
-using ModulbankInternship.Infrastructure;
+using ModulbankInternship.Accounts.Models;
+using ModulbankInternship.Infrastructure.DTO;
+using ModulbankInternship.Infrastructure.Interfaces;
 
 namespace ModulbankInternship.Users.Requests;
 
-public record GetUserWalletsQuery(Guid UserId, Guid ExecutorId) : IQuery<WalletModel[]>;
+public record GetUserAccountsQuery(Guid UserId, ExecutorData Executor) : IQuery<AccountModel[]>;

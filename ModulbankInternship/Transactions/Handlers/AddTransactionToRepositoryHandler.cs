@@ -9,9 +9,9 @@ namespace ModulbankInternship.Transactions.Handlers;
 public class AddTransactionToRepositoryHandler(ITransactionsRepository _transactionsRepository)
     : ICommandHandler<AddTransactionToRepositoryCommand, Guid>
 {
-    public Task<Guid> Handle(AddTransactionToRepositoryCommand request, CancellationToken cancellationToken)
+    public async Task<Guid> Handle(AddTransactionToRepositoryCommand request, CancellationToken cancellationToken)
     {
-        var transactionId = _transactionsRepository.Add(request.TransactionModel);
-        return Task.FromResult(transactionId);
+        var transactionId = await _transactionsRepository.AddAsync(request.TransactionModel);
+        return transactionId.Value;
     }
 }

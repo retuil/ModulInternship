@@ -7,6 +7,7 @@ ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
 COPY ["ModulbankInternship/ModulbankInternship.csproj", "ModulbankInternship/"]
 RUN dotnet restore "ModulbankInternship/ModulbankInternship.csproj"
+ENV PATH="$PATH:/root/.dotnet/tools"
 COPY . .
 WORKDIR "/src/ModulbankInternship"
 RUN dotnet build "ModulbankInternship.csproj" -c $BUILD_CONFIGURATION -o /app/build

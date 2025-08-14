@@ -7,6 +7,7 @@ using ModulbankInternship.Accounts.Models;
 using ModulbankInternship.Accounts.Requests;
 using ModulbankInternship.Infrastructure;
 using ModulbankInternship.Infrastructure.DTO;
+using ModulbankInternship.Users.Requests;
 using Guid = System.Guid;
 
 namespace ModulbankInternship.Accounts;
@@ -31,7 +32,7 @@ public class AccountsController(IMediator mediator): ControllerBase
         var executor = new ExecutorData()
         {
             UserId = Guid.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value),
-            Role = User.FindFirst(ClaimTypes.Role)?.Value
+            Role = await mediator.Send(new GetRoleFromUserDataCommand(User))
         };
         
         var account = await mediator.Send(new GetAccountByIdQuery(id, executor));
@@ -53,7 +54,7 @@ public class AccountsController(IMediator mediator): ControllerBase
         var executor = new ExecutorData()
         {
             UserId = Guid.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value),
-            Role = User.FindFirst(ClaimTypes.Role)?.Value
+            Role = await mediator.Send(new GetRoleFromUserDataCommand(User))
         };
         
         var newAccountId = await mediator.Send(new CreateAccountCommand(request, executor));
@@ -75,7 +76,7 @@ public class AccountsController(IMediator mediator): ControllerBase
         var executor = new ExecutorData()
         {
             UserId = Guid.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value),
-            Role = User.FindFirst(ClaimTypes.Role)?.Value
+            Role = await mediator.Send(new GetRoleFromUserDataCommand(User))
         };
 
         var forAny = new NewAccountForAnyUserRequest()
@@ -104,7 +105,7 @@ public class AccountsController(IMediator mediator): ControllerBase
         var executor = new ExecutorData()
         {
             UserId = Guid.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value),
-            Role = User.FindFirst(ClaimTypes.Role)?.Value
+            Role = await mediator.Send(new GetRoleFromUserDataCommand(User))
         };
 
         var modifiedParameters =
@@ -129,7 +130,7 @@ public class AccountsController(IMediator mediator): ControllerBase
         var executor = new ExecutorData()
         {
             UserId = Guid.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value),
-            Role = User.FindFirst(ClaimTypes.Role)?.Value
+            Role = await mediator.Send(new GetRoleFromUserDataCommand(User))
         };
 
         await mediator.Send(new CloseAccountCommand(id, executor));
@@ -155,7 +156,7 @@ public class AccountsController(IMediator mediator): ControllerBase
         var executor = new ExecutorData()
         {
             UserId = Guid.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value),
-            Role = User.FindFirst(ClaimTypes.Role)?.Value
+            Role = await mediator.Send(new GetRoleFromUserDataCommand(User))
         };
 
         var response = await mediator.Send(new GetAccountStatementQuery(id, startDate, finishDate, executor));
@@ -178,7 +179,7 @@ public class AccountsController(IMediator mediator): ControllerBase
         var executor = new ExecutorData()
         {
             UserId = Guid.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value),
-            Role = User.FindFirst(ClaimTypes.Role)?.Value
+            Role = await mediator.Send(new GetRoleFromUserDataCommand(User))
         };
 
         await mediator.Send(new MakeTransferCommand(request, executor));

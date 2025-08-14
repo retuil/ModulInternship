@@ -4,6 +4,13 @@
     build:
       context: .
       dockerfile: ModulbankInternship/Dockerfile
+    environment:
+      ConnectionStrings__DefaultConnection: "Host=db;Port=5432;Database=modulbank;Username=postgres;Password=postgres"
+    depends_on:
+      db:
+        condition: service_healthy
+
+
   keycloak:
     image: quay.io/keycloak/keycloak:24.0.3
     container_name: keycloak
@@ -11,12 +18,35 @@
     environment:
       - KEYCLOAK_ADMIN=admin
       - KEYCLOAK_ADMIN_PASSWORD=admin
+    depends_on:
+      - db
     volumes:
       - ./keycloak/realm-export.json:/opt/keycloak/data/import/realm-export.json
+      - keycloak_data:/opt/keycloak/data
     ports:
       - "8080:8080"
-        
+
+  db:
+    image: postgres:16
+    container_name: modulbank_db
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: modulbank
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
         
 
 volumes:
-  keycloak_data:
+  keycloak_data: {}
+  postgres_data: {}
+
+

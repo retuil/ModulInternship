@@ -6,6 +6,7 @@ using ModulbankInternship.Infrastructure;
 using ModulbankInternship.Infrastructure.DTO;
 using ModulbankInternship.Transactions.DTO;
 using ModulbankInternship.Transactions.Requests;
+using ModulbankInternship.Users.Requests;
 
 namespace ModulbankInternship.Transactions;
 
@@ -30,7 +31,7 @@ public class TransactionController(IMediator mediator)
         var executor = new ExecutorData()
         {
             UserId = Guid.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value),
-            Role = User.FindFirst(ClaimTypes.Role)?.Value
+            Role = await mediator.Send(new GetRoleFromUserDataCommand(User))
         };
         var transactionId = await mediator.Send(new MakeTransactionCommand(request, executor));
         return MbResult.Success(transactionId);

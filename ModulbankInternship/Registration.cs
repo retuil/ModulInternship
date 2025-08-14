@@ -1,22 +1,27 @@
 using System.Reflection;
 using FluentValidation;
 using FluentValidation.AspNetCore;
+using Hangfire;
+using Hangfire.PostgreSql;
 using MediatR;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using ModulbankInternship.Transactions;
 using ModulbankInternship.Transactions.Validators;
-using ModulbankInternship.Accounts;
 using ModulbankInternship.Accounts.Interfaces;
+using ModulbankInternship.Accounts.Repositories;
+using ModulbankInternship.Accounts.Services;
 using ModulbankInternship.Accounts.Validators;
+using ModulbankInternship.Infrastructure;
 using ModulbankInternship.Transactions.Interfaces;
 
 namespace ModulbankInternship;
 
-public static class Registration
+public class Registration(WebApplicationBuilder builder)
 {
-    public static void RegisterMediatR(WebApplicationBuilder builder)
+    public Registration RegisterMediatR()
     {
         builder.Services.AddMediatR(cfg =>
         {
@@ -43,8 +48,10 @@ public static class Registration
         {
             cfg.RegisterServicesFromAssemblyContaining<NewTransactionValidator>();
         });
+        
+        return this;
     }
-    public static void RegisterValidators(WebApplicationBuilder builder)
+    public Registration RegisterValidators()
     {
         ValidatorOptions.Global.DefaultClassLevelCascadeMode = CascadeMode.Continue;
         ValidatorOptions.Global.DefaultRuleLevelCascadeMode = CascadeMode.Stop;
@@ -67,15 +74,19 @@ public static class Registration
         builder.Services.AddFluentValidationAutoValidation();
         builder.Services.AddFluentValidationClientsideAdapters();
         builder.Services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>));
+
+        return this;
     }
 
-    public static void RegistryInjections(WebApplicationBuilder builder)
+    public Registration RegistryInjections()
     {
-        builder.Services.AddSingleton<ITransactionsRepository, TransactionsRepository>();
-        builder.Services.AddSingleton<IAccountsRepository, AccountsRepository>();
+        builder.Services.AddScoped<ITransactionsRepository, TransactionsRepository>();
+        builder.Services.AddScoped<IAccountsRepository, AccountsRepository>();
+        builder.Services.AddScoped<InterestService>();
+        return this;
     }
 
-    public static void RegisterSwagger(WebApplicationBuilder builder)
+    public Registration RegisterSwagger()
     {
         builder.Services.AddEndpointsApiExplorer();
 
@@ -116,7 +127,7 @@ public static class Registration
                             Id = "oauth2"
                         }
                     },
-                    new[] { "openid", "profile", "email" }
+                    new[] { "openid", "profile", "roles" }
                 }
             });
         });
@@ -131,9 +142,11 @@ public static class Registration
             {
                 options.JsonSerializerOptions.Converters.Add(new System.Text.Json.Serialization.JsonStringEnumConverter());
             });
+
+        return this;
     }
 
-    public static void RegisterJWT(WebApplicationBuilder builder)
+    public Registration RegisterJWT()
     {
         builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             .AddJwtBearer(options =>
@@ -144,7 +157,6 @@ public static class Registration
                 options.TokenValidationParameters = new TokenValidationParameters
                 {
                     ValidateAudience = false,
-                    ValidAudience = "modulbank-api",
                     NameClaimType = "preferred_username",
                     RoleClaimType = "roles"
                 };
@@ -153,5 +165,27 @@ public static class Registration
         builder.Services.AddAuthorization();
 
         builder.Services.AddEndpointsApiExplorer();
+
+        return this;
+    }
+
+    public Registration RegisterDB()
+    {
+        builder.Services.AddDbContext<ApplicationDbContext>(options =>
+            options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+        return this;
+    }
+
+    public Registration RegisterHangfire()
+    {
+        builder.Services.AddHangfire(cfg =>
+            cfg.UsePostgreSqlStorage(builder.Configuration.GetConnectionString("DefaultConnection"))
+        );
+
+        builder.Services.AddHangfireServer();
+
+        builder.Services.AddHostedService<RecurringJobsHostedService>();
+
+        return this;
     }
 }

@@ -1,3 +1,4 @@
+using Microsoft.EntityFrameworkCore;
 using ModulbankInternship.Infrastructure;
 using ModulbankInternship.Infrastructure.Exceptions;
 
@@ -35,6 +36,15 @@ public class ValidationExceptionMiddleware(RequestDelegate next)
             context.Response.ContentType = "application/json";
 
             var response = MbResult.Failure<bool>("404", ex.Message);
+
+            await context.Response.WriteAsJsonAsync(response);
+        }
+        catch (DbUpdateConcurrencyException ex)
+        {
+            context.Response.StatusCode = 409;
+            context.Response.ContentType = "application/json";
+
+            var response = MbResult.Failure<bool>("409", ex.Message);
 
             await context.Response.WriteAsJsonAsync(response);
         }

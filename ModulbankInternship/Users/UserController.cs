@@ -28,7 +28,7 @@ public class UserController(IMediator mediator) : ControllerBase
         var executor = new ExecutorData()
         {
             UserId = Guid.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value),
-            Role = User.FindFirst(ClaimTypes.Role)?.Value
+            Role = await mediator.Send(new GetRoleFromUserDataCommand(User))
         };
         var accounts = await mediator.Send(new GetUserAccountsQuery(id, executor));
         return MbResult.Success(accounts);
@@ -45,12 +45,14 @@ public class UserController(IMediator mediator) : ControllerBase
     [Microsoft.AspNetCore.Mvc.Route("/Accounts")]
     public async Task<MbResult<AccountModel[]>> GetCurrentUserAccounts()
     {
+        
+        
         var executor = new ExecutorData()
         {
             UserId = Guid.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value),
-            Role = User.FindFirst(ClaimTypes.Role)?.Value
+            Role = await mediator.Send(new GetRoleFromUserDataCommand(User))
         };
-        var accounts = await mediator.Send(new GetUserAccountsQuery(executor.UserId, executor));
+        var accounts = await mediator.Send(new GetOwnerAccountsQuery(executor.UserId, executor));
         return MbResult.Success(accounts);
     }
 }

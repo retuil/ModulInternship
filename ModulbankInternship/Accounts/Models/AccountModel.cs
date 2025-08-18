@@ -1,3 +1,5 @@
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using ModulbankInternship.Accounts.Enums;
 using ModulbankInternship.Infrastructure;
 using ModulbankInternship.Infrastructure.Interfaces;
@@ -36,4 +38,8 @@ public class AccountModel: IModel
     
     /// <summary>Список транзакций по счету</summary>
     public List<TransactionModel> Transactions { get; set; } = [];
+    
+    [ConcurrencyCheck]
+    [Column("xmin", TypeName = "xid")]
+    public uint Version { get; set; }
 }

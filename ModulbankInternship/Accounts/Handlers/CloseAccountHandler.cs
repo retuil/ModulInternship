@@ -1,4 +1,5 @@
 using MediatR;
+using ModulbankInternship.Accounts.Exceptions;
 using ModulbankInternship.Accounts.Interfaces;
 using ModulbankInternship.Accounts.Requests;
 using ModulbankInternship.Infrastructure;
@@ -10,20 +11,15 @@ using ModulbankInternship.Users.Requests;
 namespace ModulbankInternship.Accounts.Handlers;
 
 public class CloseAccountHandler(IMediator mediator, IAccountsRepository accountsRepository)
-    : ICommandHandler<CloseAccountCommand, bool>
 {
-    public Task<bool> Handle(CloseAccountCommand request, CancellationToken cancellationToken)
+    public async Task<bool> Handle(CloseAccountCommand request, CancellationToken cancellationToken)
     {
-        var account = accountsRepository.Get(request.AccountId);
-        if (account is null || !account.IsExist)
-        {
-            throw new ResourceNotFoundException($"No open Account with id: {request.AccountId}");
-        }
+        var account = await mediator.Send(new GetAccountByIdInternalQuery(request.AccountId), cancellationToken);
         
-        mediator.Send(new CheckExecutorAccessCommand(account.OwnerId, request.Executor,
+        await mediator.Send(new CheckExecutorAccessCommand(account.OwnerId, request.Executor,
                     new[] { EAccessClass.Owner, EAccessClass.Manager }), cancellationToken);
         
-        accountsRepository.Delete(request.AccountId);
-        return Task.FromResult(true);
+        await accountsRepository.DeleteAsync(request.AccountId);
+        return true;
     }
 }

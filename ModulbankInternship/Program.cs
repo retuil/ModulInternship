@@ -1,22 +1,33 @@
 using FluentValidation;
 using FluentValidation.AspNetCore;
+using Hangfire;
+using Hangfire.Common;
 using MediatR;
+using Microsoft.EntityFrameworkCore;
 using ModulbankInternship;
+using ModulbankInternship.Accounts.Services;
+using ModulbankInternship.Infrastructure;
 
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
 
-Registration.RegisterMediatR(builder);
-Registration.RegistryInjections(builder);
-Registration.RegisterValidators(builder);
-Registration.RegisterJWT(builder);
-Registration.RegisterSwagger(builder);
+new Registration(builder)
+    .RegisterDB()
+    .RegisterHangfire()
+    .RegisterMediatR()
+    .RegistryInjections()
+    .RegisterValidators()
+    .RegisterJWT()
+    .RegisterSwagger();
+
+
 
 
 var app = builder.Build();
 app.UseMiddleware<ValidationExceptionMiddleware>();
+
 
 
 if (app.Environment.IsDevelopment())

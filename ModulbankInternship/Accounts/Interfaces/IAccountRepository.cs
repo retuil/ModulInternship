@@ -6,5 +6,5 @@ namespace ModulbankInternship.Accounts.Interfaces;
 
 public interface IAccountsRepository: IRepository<AccountModel>
 {
-    public AccountModel[] GetAllByOwner(Guid ownerId);
+    public Task<IEnumerable<AccountModel>> GetAllByOwnerIdAsync(Guid ownerId);
 }

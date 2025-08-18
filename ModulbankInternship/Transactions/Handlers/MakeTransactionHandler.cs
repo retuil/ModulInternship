@@ -10,27 +10,28 @@ using ModulbankInternship.Users.Enums;
 
 namespace ModulbankInternship.Transactions.Handlers;
 
-public class MakeTransactionHandler(IMediator _mediator, IAccountsRepository _AccountsRepository)
+public class MakeTransactionHandler(IMediator mediator, IAccountsRepository accountsRepository)
     : ICommandHandler<MakeTransactionCommand, Guid>
 {
     public async Task<Guid> Handle(MakeTransactionCommand request, CancellationToken cancellationToken)
     {
         var newTransactionRequest = request.NewTransactionRequest;
-        var ownerId = _AccountsRepository.Get(newTransactionRequest.AccountId).OwnerId;
-        await _mediator.Send(new CheckExecutorAccessCommand(ownerId, request.Executor,
+        var accountModel = await accountsRepository.GetByIdAsync(newTransactionRequest.AccountId);
+        var ownerId = accountModel.OwnerId;
+        await mediator.Send(new CheckExecutorAccessCommand(ownerId, request.Executor,
             new [] { EAccessClass.Manager, EAccessClass.Cashier }), cancellationToken);
         var newTransaction = new TransactionModel()
         {
             Amount = newTransactionRequest.Amount,
             CounterpartyAccountId = newTransactionRequest.CounterpartyAccountId,
             Currency = newTransactionRequest.Currency,
-            DateTime = DateTime.Now,
+            DateTime = DateTime.UtcNow,
             Description = newTransactionRequest.Description,
             Type = newTransactionRequest.TransactionType,
             AccountId = newTransactionRequest.AccountId
         };
         
-        var newTransactionId = await _mediator.Send(new NewTransactionCommand(newTransaction), cancellationToken);
+        var newTransactionId = await mediator.Send(new AddTransactionToRepositoryCommand(newTransaction), cancellationToken);
         return newTransactionId;
     }
 }

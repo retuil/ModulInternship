@@ -13,7 +13,7 @@ WORKDIR "/src/ModulbankInternship"
 RUN dotnet build "ModulbankInternship.csproj" -c $BUILD_CONFIGURATION -o /app/build
 
 FROM build AS publish
-ARG BUILD_CONFIGURATION=Release
+ARG BUILD_CONFIGURATION=Relea
 RUN dotnet publish "ModulbankInternship.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
 
 FROM base AS final

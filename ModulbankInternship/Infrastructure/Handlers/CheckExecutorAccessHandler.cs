@@ -1,10 +1,9 @@
-using ModulbankInternship.Infrastructure;
 using ModulbankInternship.Infrastructure.Exceptions;
 using ModulbankInternship.Infrastructure.Interfaces;
 using ModulbankInternship.Users.Enums;
 using ModulbankInternship.Users.Requests;
 
-namespace ModulbankInternship.Users.Handlers;
+namespace ModulbankInternship.Infrastructure.Handlers;
 
 public class CheckExecutorAccessHandler
     : ICommandHandler<CheckExecutorAccessCommand, bool>

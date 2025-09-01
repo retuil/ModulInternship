@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using ModulbankInternship.Accounts.Domain.Exceptions;
 using ModulbankInternship.Infrastructure;
 using ModulbankInternship.Infrastructure.Exceptions;
 
@@ -14,7 +15,7 @@ public class ValidationExceptionMiddleware(RequestDelegate next)
         }
         catch (FluentValidation.ValidationException ex)
         {
-            context.Response.StatusCode = 400;
+            context.Response.StatusCode = StatusCodes.Status400BadRequest;
             context.Response.ContentType = "application/json";
 
             var response = MbResult.Failure<bool>("400", "Validation failed");
@@ -23,7 +24,7 @@ public class ValidationExceptionMiddleware(RequestDelegate next)
         }
         catch (ForbiddenException ex)
         {
-            context.Response.StatusCode = 403;
+            context.Response.StatusCode = StatusCodes.Status403Forbidden;
             context.Response.ContentType = "application/json";
 
             var response = MbResult.Failure<bool>("403", ex.Message);
@@ -32,7 +33,7 @@ public class ValidationExceptionMiddleware(RequestDelegate next)
         }
         catch (ResourceNotFoundException ex)
         {
-            context.Response.StatusCode = 404;
+            context.Response.StatusCode = StatusCodes.Status404NotFound;
             context.Response.ContentType = "application/json";
 
             var response = MbResult.Failure<bool>("404", ex.Message);
@@ -41,7 +42,16 @@ public class ValidationExceptionMiddleware(RequestDelegate next)
         }
         catch (DbUpdateConcurrencyException ex)
         {
-            context.Response.StatusCode = 409;
+            context.Response.StatusCode = StatusCodes.Status409Conflict;
+            context.Response.ContentType = "application/json";
+
+            var response = MbResult.Failure<bool>("409", ex.Message);
+
+            await context.Response.WriteAsJsonAsync(response);
+        }
+        catch (AccountBlockedException ex)
+        {
+            context.Response.StatusCode = StatusCodes.Status409Conflict;
             context.Response.ContentType = "application/json";
 
             var response = MbResult.Failure<bool>("409", ex.Message);

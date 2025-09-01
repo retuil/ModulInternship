@@ -22,7 +22,7 @@ namespace ModulbankInternship.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
-            modelBuilder.Entity("ModulbankInternship.Accounts.Models.AccountModel", b =>
+            modelBuilder.Entity("ModulbankInternship.Accounts.Domain.Models.AccountModel", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -50,15 +50,103 @@ namespace ModulbankInternship.Migrations
                     b.Property<bool>("IsExist")
                         .HasColumnType("boolean");
 
+                    b.Property<bool>("IsFrozen")
+                        .HasColumnType("boolean");
+
                     b.Property<DateTime>("OpeningDate")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<Guid>("OwnerId")
                         .HasColumnType("uuid");
 
+                    b.Property<uint>("Version")
+                        .IsConcurrencyToken()
+                        .HasColumnType("xid")
+                        .HasColumnName("xmin");
+
                     b.HasKey("Id");
 
                     b.ToTable("Accounts");
+                });
+
+            modelBuilder.Entity("ModulbankInternship.Infrastructure.Rabbit.Inbox.InboxConsumedModel", b =>
+                {
+                    b.Property<Guid>("EventId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Handler")
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<DateTime>("ProcessedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("EventId");
+
+                    b.ToTable("InboxConsumed");
+                });
+
+            modelBuilder.Entity("ModulbankInternship.Infrastructure.Rabbit.Inbox.Quarantine.InboxDeadLetterModel", b =>
+                {
+                    b.Property<Guid>("MessageId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Handler")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Error")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Payload")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("ReceivedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("MessageId", "Handler");
+
+                    b.ToTable("InboxDeadLetter");
+                });
+
+            modelBuilder.Entity("ModulbankInternship.Infrastructure.Rabbit.Models.OutboxMessageModel", b =>
+                {
+                    b.Property<Guid>("MessageId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("AttemptCount")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime?>("DispatchedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("EventType")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<bool>("IsDispatched")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("LastError")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Payload")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("RoutingKey")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("MessageId");
+
+                    b.ToTable("OutboxMessages");
                 });
 
             modelBuilder.Entity("ModulbankInternship.Transactions.Models.TransactionModel", b =>
@@ -105,21 +193,96 @@ namespace ModulbankInternship.Migrations
                     b.ToTable("Transactions");
                 });
 
+            modelBuilder.Entity("ModulbankInternship.Transactions.Models.TransferModel", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<decimal>("Amount")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("numeric(18,2)");
+
+                    b.Property<Guid>("CreditTransactionId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Currency")
+                        .IsRequired()
+                        .HasMaxLength(3)
+                        .HasColumnType("character varying(3)");
+
+                    b.Property<DateTime>("DateTime")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("DebitTransactionId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("DestinationAccountId")
+                        .HasColumnType("uuid");
+
+                    b.Property<bool>("IsExist")
+                        .HasColumnType("boolean");
+
+                    b.Property<Guid>("SourceAccountId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CreditTransactionId")
+                        .IsUnique();
+
+                    b.HasIndex("DebitTransactionId")
+                        .IsUnique();
+
+                    b.HasIndex("DestinationAccountId");
+
+                    b.HasIndex("SourceAccountId");
+
+                    b.ToTable("Transfers");
+                });
+
             modelBuilder.Entity("ModulbankInternship.Transactions.Models.TransactionModel", b =>
                 {
-                    b.HasOne("ModulbankInternship.Accounts.Models.AccountModel", null)
+                    b.HasOne("ModulbankInternship.Accounts.Domain.Models.AccountModel", null)
                         .WithMany("Transactions")
                         .HasForeignKey("AccountId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("ModulbankInternship.Accounts.Models.AccountModel", null)
+                    b.HasOne("ModulbankInternship.Accounts.Domain.Models.AccountModel", null)
                         .WithMany()
                         .HasForeignKey("CounterpartyAccountId")
                         .OnDelete(DeleteBehavior.NoAction);
                 });
 
-            modelBuilder.Entity("ModulbankInternship.Accounts.Models.AccountModel", b =>
+            modelBuilder.Entity("ModulbankInternship.Transactions.Models.TransferModel", b =>
+                {
+                    b.HasOne("ModulbankInternship.Transactions.Models.TransactionModel", null)
+                        .WithOne()
+                        .HasForeignKey("ModulbankInternship.Transactions.Models.TransferModel", "CreditTransactionId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("ModulbankInternship.Transactions.Models.TransactionModel", null)
+                        .WithOne()
+                        .HasForeignKey("ModulbankInternship.Transactions.Models.TransferModel", "DebitTransactionId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("ModulbankInternship.Accounts.Domain.Models.AccountModel", null)
+                        .WithMany()
+                        .HasForeignKey("DestinationAccountId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("ModulbankInternship.Accounts.Domain.Models.AccountModel", null)
+                        .WithMany()
+                        .HasForeignKey("SourceAccountId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("ModulbankInternship.Accounts.Domain.Models.AccountModel", b =>
                 {
                     b.Navigation("Transactions");
                 });

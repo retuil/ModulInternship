@@ -1,29 +1,18 @@
 using Hangfire;
-using Microsoft.Extensions.Hosting;
-using System;
-using System.Threading;
-using System.Threading.Tasks;
-using ModulbankInternship.Accounts.Services;
+using ModulbankInternship.Accounts.Modify;
 
 namespace ModulbankInternship.Infrastructure
 {
-    public class RecurringJobsHostedService : IHostedService
+    public class RecurringJobsHostedService(IServiceProvider serviceProvider) : IHostedService
     {
-        private readonly IServiceProvider _serviceProvider;
-
-        public RecurringJobsHostedService(IServiceProvider serviceProvider)
-        {
-            _serviceProvider = serviceProvider;
-        }
-
         public Task StartAsync(CancellationToken cancellationToken)
         {
-            using var scope = _serviceProvider.CreateScope();
+            using var scope = serviceProvider.CreateScope();
             var recurringJobManager = scope.ServiceProvider.GetRequiredService<IRecurringJobManager>();
 
-            recurringJobManager.AddOrUpdate<InterestService>(
+            recurringJobManager.AddOrUpdate<IModifyAccountRepository>(
                 "daily-interest-accrual",
-                svc => svc.AccrueDailyInterestAsync(),
+                svc => svc.AccrueInterestsAsync(),
                 Cron.Daily
             );
 

@@ -1,12 +1,4 @@
-using FluentValidation;
-using FluentValidation.AspNetCore;
-using Hangfire;
-using Hangfire.Common;
-using MediatR;
-using Microsoft.EntityFrameworkCore;
 using ModulbankInternship;
-using ModulbankInternship.Accounts.Services;
-using ModulbankInternship.Infrastructure;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -20,38 +12,48 @@ new Registration(builder)
     .RegistryInjections()
     .RegisterValidators()
     .RegisterJWT()
-    .RegisterSwagger();
+    .RegisterSwagger()
+    .RegisterLogger()
+    .RegisterHealthCheck()
+    .RegisterRabbit();
+
+builder.WebHost.UseUrls("http://0.0.0.0:80");
 
 
 
 
 var app = builder.Build();
 app.UseMiddleware<ValidationExceptionMiddleware>();
+app.UseMiddleware<RequestLoggingMiddleware>();
 
 
-
-if (app.Environment.IsDevelopment())
+app.UseSwagger();
+app.UseSwaggerUI(c =>
 {
-    app.UseSwagger();
-    app.UseSwaggerUI(c =>
-    {
-        c.SwaggerEndpoint("/swagger/v1/swagger.json", "Modulbank API v1");
+    c.SwaggerEndpoint("/swagger/v1/swagger.json", "Modulbank API v1");
 
-        c.OAuthClientId("modulbank-api");
-        c.OAuthUsePkce();
-        c.OAuthScopeSeparator(" ");
-    });
-    app.Use(async (context, next) =>
+    c.OAuthClientId("modulbank-api");
+    c.OAuthUsePkce();
+    c.OAuthScopeSeparator(" ");
+});
+app.Use(async (context, next) =>
+{
+    if (context.Request.Path == "/")
     {
-        if (context.Request.Path == "/")
-        {
-            context.Response.Redirect("/swagger");
-            return;
-        }
+        context.Response.Redirect("/swagger");
+        return;
+    }
 
-        await next();
-    });
-}
+    await next();
+});
+
+app.UseDeveloperExceptionPage();
+
+// using (var scope = app.Services.CreateScope())
+// {
+//     var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+//     db.Database.Migrate();
+// }
 
 app.MapControllers();
 

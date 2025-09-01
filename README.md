@@ -1,16 +1,21 @@
 # ModulInternship
 
+## Назначение:
+Сервис для управления счетами и денежными операциями. Имеет функционал:
+- зачисления и списания денег на счет, при помощи кассира или менеджера сервиса
+- открытие счета-вклада, средства на котором автоматически возрастают согласно процентной ставке
+- денежных переводов между счетами сервиса, осуществляемых пользователем
+- поддерживается обработка сообщений о блокировке счета
+
 ## Запуск
 1. В консоли: docker-compose up --build
-2. Запуск приложения в режиме http
+2. Открыть http://localhost/swagger/
 
 
 
 ## Данные для авторизации
-*client secret:* tZBXCDepZeH1XAGQFZyu6v2ONFnQFGLx
 
-*login:* aaa   *password:* aaaaaa
-*login:* bbb   *password:* bbbbbb
+*login:* aaa   *password:* AAA
 
 Для андминки keycloak (http://localhost:8080/admin/master/console/#/modulbank):
 *login:* admin   *password*: admin

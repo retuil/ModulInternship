@@ -1,7 +1,0 @@
-using ModulbankInternship.Accounts.Models;
-using ModulbankInternship.Infrastructure.DTO;
-using ModulbankInternship.Infrastructure.Interfaces;
-
-namespace ModulbankInternship.Users.Requests;
-
-public record GetOwnerAccountsQuery(Guid UserId, ExecutorData Executor) : IQuery<AccountModel[]>;

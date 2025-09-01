@@ -8,14 +8,23 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
-using ModulbankInternship.Transactions;
-using ModulbankInternship.Transactions.Validators;
-using ModulbankInternship.Accounts.Interfaces;
-using ModulbankInternship.Accounts.Repositories;
-using ModulbankInternship.Accounts.Services;
-using ModulbankInternship.Accounts.Validators;
+using ModulbankInternship.Accounts;
+using ModulbankInternship.Accounts.Transactions;
+using ModulbankInternship.Accounts.Transfer;
+using ModulbankInternship.HealthChecks.Ready;
+using ModulbankInternship.HealthChecks.Ready.Outbox;
+using ModulbankInternship.HealthChecks.Ready.RabbitMQ;
 using ModulbankInternship.Infrastructure;
-using ModulbankInternship.Transactions.Interfaces;
+using ModulbankInternship.Infrastructure.Rabbit;
+using ModulbankInternship.Infrastructure.Rabbit.Inbox.Antifraud;
+using ModulbankInternship.Infrastructure.Rabbit.Inbox.Audit;
+using ModulbankInternship.Infrastructure.Rabbit.Outbox;
+using ModulbankInternship.Infrastructure.Rabbit.Outbox.publisher;
+using RabbitMQ.Client;
+using Reo.Core.RabbitMQ.Fakes;
+using Serilog;
+using IModel = RabbitMQ.Client.IModel;
+
 
 namespace ModulbankInternship;
 
@@ -28,26 +37,9 @@ public class Registration(WebApplicationBuilder builder)
             cfg.RegisterServicesFromAssembly(typeof(Program).Assembly);
         });
         
-        builder.Services.AddMediatR(cfg =>
-        {
-            cfg.RegisterServicesFromAssemblyContaining<ModifyAccountValidator>();
-        });
-        builder.Services.AddMediatR(cfg =>
-        {
-            cfg.RegisterServicesFromAssemblyContaining<NewAccountForCurrentUserValidator>();
-        });
-        builder.Services.AddMediatR(cfg =>
-        {
-            cfg.RegisterServicesFromAssemblyContaining<NewAccountForAnyUserValidator>();
-        });
-        builder.Services.AddMediatR(cfg =>
-        {
-            cfg.RegisterServicesFromAssemblyContaining<TransferValidator>();
-        });
-        builder.Services.AddMediatR(cfg =>
-        {
-            cfg.RegisterServicesFromAssemblyContaining<NewTransactionValidator>();
-        });
+        AccountRegistration.RegisterMediator(builder);
+        TransactionRegistration.RegisterMediator(builder);
+        TransferRegistration.RegisterMediator(builder);
         
         return this;
     }
@@ -56,20 +48,9 @@ public class Registration(WebApplicationBuilder builder)
         ValidatorOptions.Global.DefaultClassLevelCascadeMode = CascadeMode.Continue;
         ValidatorOptions.Global.DefaultRuleLevelCascadeMode = CascadeMode.Stop;
         
-        builder.Services.AddValidatorsFromAssemblyContaining<ModifyAccountValidator>();
-        
-       
-        builder.Services.AddValidatorsFromAssemblyContaining<NewAccountForCurrentUserValidator>();
-        
-        
-        builder.Services.AddValidatorsFromAssemblyContaining<NewAccountForAnyUserValidator>();
-        
-        
-        builder.Services.AddValidatorsFromAssemblyContaining<TransferValidator>();
-        
-        
-        builder.Services.AddValidatorsFromAssemblyContaining<NewTransactionValidator>();
-        
+        AccountRegistration.RegisterValidators(builder);
+        TransactionRegistration.RegisterValidators(builder);
+        TransferRegistration.RegisterValidators(builder);
         
         builder.Services.AddFluentValidationAutoValidation();
         builder.Services.AddFluentValidationClientsideAdapters();
@@ -80,9 +61,11 @@ public class Registration(WebApplicationBuilder builder)
 
     public Registration RegistryInjections()
     {
-        builder.Services.AddScoped<ITransactionsRepository, TransactionsRepository>();
-        builder.Services.AddScoped<IAccountsRepository, AccountsRepository>();
-        builder.Services.AddScoped<InterestService>();
+        AccountRegistration.RegisterInjections(builder);
+        TransactionRegistration.RegisterInjections(builder);
+        TransferRegistration.RegisterInjections(builder);
+        
+        builder.Services.AddScoped<IMessagePublisher, RabbitMessagePublisher>();
         return this;
     }
 
@@ -151,12 +134,14 @@ public class Registration(WebApplicationBuilder builder)
         builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             .AddJwtBearer(options =>
             {
-                options.Authority = "http://localhost:8080/realms/modulbank";
+                options.Authority = "http://keycloak:8080/realms/modulbank";
                 options.Audience = "modulbank-api";
                 options.RequireHttpsMetadata = false;
                 options.TokenValidationParameters = new TokenValidationParameters
                 {
                     ValidateAudience = false,
+                    ValidateIssuer = true,
+                    ValidIssuer = "http://localhost:8080/realms/modulbank",
                     NameClaimType = "preferred_username",
                     RoleClaimType = "roles"
                 };
@@ -175,7 +160,7 @@ public class Registration(WebApplicationBuilder builder)
             options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
         return this;
     }
-
+    
     public Registration RegisterHangfire()
     {
         builder.Services.AddHangfire(cfg =>
@@ -187,5 +172,85 @@ public class Registration(WebApplicationBuilder builder)
         builder.Services.AddHostedService<RecurringJobsHostedService>();
 
         return this;
+    }
+
+    public Registration RegisterLogger()
+    {
+        Log.Logger = new LoggerConfiguration()
+            .MinimumLevel.Information()
+            .Enrich.FromLogContext()
+            .WriteTo.Console(
+                outputTemplate: "[{Timestamp:HH:mm:ss} {Level:u3}] {Message:lj}{NewLine}{Exception}"
+            )
+            .WriteTo.File("logs/log-.txt",
+                rollingInterval: RollingInterval.Day,
+                outputTemplate: "[{Timestamp:yyyy-MM-dd HH:mm:ss} {Level:u3}] {Message:lj}{NewLine}{Exception}"
+            )
+            .CreateLogger();
+
+
+        builder.Host.UseSerilog();
+        return this;
+    }
+
+    public Registration RegisterHealthCheck()
+    {
+        builder.Services.AddHealthChecks()
+            .AddCheck<RabbitMqHealthCheck>("rabbitmq")
+            .AddCheck<OutboxHealthCheck>("outbox");
+        return this;
+    }
+
+    public Registration RegisterRabbit()
+    {
+        if (!builder.Configuration.GetValue<bool>("RabbitMQ:Enabled"))
+        {
+            return this;
+        }
+        
+        builder.Services.AddSingleton<RabbitMQ.Client.IConnectionFactory>(_ =>
+            new ConnectionFactory
+            {
+                Uri = new Uri(builder.Configuration["RabbitMq:ConnectionString"]!),
+                DispatchConsumersAsync = true
+            });
+
+
+        builder.Services.AddSingleton<IConnection>(sp =>
+        {
+            var factory = sp.GetRequiredService<RabbitMQ.Client.IConnectionFactory>();
+            return factory.CreateConnection();
+        });
+
+        builder.Services.AddSingleton<IModel>(sp =>
+        {
+            var conn = sp.GetRequiredService<IConnection>();
+            var channel = conn.CreateModel();
+
+            DeclareRabbitTopology(channel);
+
+            return channel;
+        });
+
+        builder.Services.AddHostedService<OutboxDispatcher>();
+        builder.Services.AddHostedService<AntifraudConsumer>();
+        builder.Services.AddHostedService<AuditConsumer>();
+
+        return this;
+    }
+    
+    private static void DeclareRabbitTopology(IModel ch)
+    {
+        ch.ExchangeDeclare("account.events", ExchangeType.Topic, durable: true);
+
+        ch.QueueDeclare("account.crm", durable: true, exclusive: false, autoDelete: false);
+        ch.QueueDeclare("account.notifications", durable: true, exclusive: false, autoDelete: false);
+        ch.QueueDeclare("account.antifraud", durable: true, exclusive: false, autoDelete: false);
+        ch.QueueDeclare("account.audit", durable: true, exclusive: false, autoDelete: false);
+
+        ch.QueueBind("account.crm", "account.events", "account.*");
+        ch.QueueBind("account.notifications", "account.events", "money.*");
+        ch.QueueBind("account.antifraud", "account.events", "antifraud.client.#");
+        ch.QueueBind("account.audit", "account.events", "#");
     }
 }

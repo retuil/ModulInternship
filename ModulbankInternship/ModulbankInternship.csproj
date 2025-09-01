@@ -11,6 +11,7 @@
 
     <ItemGroup>
       <PackageReference Include="Abp.ZeroCore.IdentityServer4" Version="8.4.0" />
+      <PackageReference Include="Docker.DotNet" Version="3.125.15" />
       <PackageReference Include="FluentValidation.AspNetCore" Version="11.3.1" />
       <PackageReference Include="Hangfire.AspNetCore" Version="1.8.21" />
       <PackageReference Include="Hangfire.PostgreSql" Version="1.20.12" />
@@ -25,16 +26,27 @@
       <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="9.0.8" />
       <PackageReference Include="Net4x.FluentValidation.DependencyInjectionExtensions" Version="11.5.2" />
       <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="9.0.4" />
+      <PackageReference Include="RabbitMQ.Client" Version="6.8.1" />
+      <PackageReference Include="Reo.Core.RabbitMQ.Fakes" Version="6.0.30158" />
+      <PackageReference Include="Serilog.AspNetCore" Version="9.0.0" />
+      <PackageReference Include="Serilog.Sinks.Console" Version="6.0.1-dev-00953" />
+      <PackageReference Include="Serilog.Sinks.File" Version="7.0.0" />
       <PackageReference Include="Swagger-Net" Version="8.5.12.1" />
       <PackageReference Include="Swashbuckle" Version="5.6.0" />
       <PackageReference Include="Swashbuckle.AspNetCore" Version="9.0.3" />
       <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.13.0" />
+        <InternalsVisibleTo Include="ModulbankInternship.Tests" />
+        <PackageReference Include="Testcontainers" Version="4.7.0" />
     </ItemGroup>
 
     <ItemGroup>
       <Content Include="..\.dockerignore">
         <Link>.dockerignore</Link>
       </Content>
+    </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="Accounts\Domain\" />
     </ItemGroup>
 
 </Project>

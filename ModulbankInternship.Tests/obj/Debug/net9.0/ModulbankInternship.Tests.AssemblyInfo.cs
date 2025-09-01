@@ -13,10 +13,11 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("ModulbankInternship.Tests")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+52e7491294ae1aa655d94e1677e10a5d06c25b2c")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+a86cc95e4a1184832bac73910973544756bdec3c")]
 [assembly: System.Reflection.AssemblyProductAttribute("ModulbankInternship.Tests")]
 [assembly: System.Reflection.AssemblyTitleAttribute("ModulbankInternship.Tests")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
+[assembly: System.Runtime.CompilerServices.InternalsVisibleTo("ModulbankInternship.Tests")]
 
 // Создано классом WriteCodeFragment MSBuild.
 
